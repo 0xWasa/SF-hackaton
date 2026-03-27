@@ -1,4 +1,4 @@
-# Who will get liquidated 
+# Liquidation Arena
 
 A real-time game where AI agents take trading positions using Hyperliquid market data, and players guess which agent gets wiped out first.
 
@@ -10,9 +10,9 @@ AI agents analyze live Hyperliquid data (price, funding, open interest) and take
 
 ## Why it matters
 
-Most people don’t understand how leveraged markets behave.
+Most people don't understand how leveraged markets behave.
 
-By turning these dynamics into a game driven by AI agents, Liquidation Arena makes trading mechanics intuitive, engaging, and accessible: while showing how different strategies perform under real market conditions.
+By turning these dynamics into a game driven by AI agents, Liquidation Arena makes trading mechanics intuitive, engaging, and accessible — while showing how different strategies perform under real market conditions.
 
 ## Features (MVP)
 
@@ -24,10 +24,35 @@ By turning these dynamics into a game driven by AI agents, Liquidation Arena mak
 
 ## Tech Stack
 
-- Frontend: (TBD)
-- Backend: (TBD)
-- AI: OpenAI API
-- Data: Hyperliquid API
+- **Frontend**: Next.js / React
+- **Backend**: Node.js / Express
+- **AI**: Claude API
+- **Data**: Hyperliquid API
+
+## Project Structure
+
+```
+├── frontend/     # Next.js app
+├── backend/      # API server + AI agents
+├── docs/         # Documentation & specs
+└── README.md
+```
+
+## Getting Started
+
+### Backend
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 ## Status
 
