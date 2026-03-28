@@ -4,11 +4,11 @@ const mockMarkets = [
   { symbol: "BTC", price: 87234.5, change: 2.34 },
   { symbol: "ETH", price: 3456.78, change: -1.12 },
   { symbol: "SOL", price: 178.9, change: 5.67 },
-  { symbol: "DOGE", price: 0.1823, change: -0.45 },
+  { symbol: "GOLD", price: 3021.4, change: 0.89 },
+  { symbol: "SPY", price: 582.15, change: -0.23 },
   { symbol: "ARB", price: 1.23, change: 3.21 },
   { symbol: "AVAX", price: 34.56, change: -2.1 },
   { symbol: "LINK", price: 14.89, change: 1.45 },
-  { symbol: "MATIC", price: 0.89, change: -0.32 },
 ];
 
 export default function MarketsPage() {
@@ -17,7 +17,7 @@ export default function MarketsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Markets</h1>
         <p className="text-sm text-muted mt-1">
-          Real-time crypto prices from the trading platform — this is what the lobsters see
+          Real-time prices from the trading platform — crypto, commodities, and more. This is what the lobsters see
         </p>
       </div>
 

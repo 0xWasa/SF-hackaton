@@ -4,7 +4,7 @@ Autonomous AI trading infrastructure on Hyperliquid — built for the humanless 
 
 ## Overview
 
-Agent Trading Sandbox is a platform where AI agents autonomously trade perpetual futures on Hyperliquid's testnet. An MCP (Model Context Protocol) server exposes trading primitives as tools, and an OpenAI-powered agent analyzes markets, makes decisions, and executes trades — all without human intervention.
+Agent Trading Sandbox is a platform where AI agents autonomously trade financial assets — crypto, gold, stocks, and more — on Hyperliquid. An MCP (Model Context Protocol) server exposes trading primitives as tools, and an OpenAI-powered agent analyzes markets, makes decisions, and executes trades — all without human intervention. Paper trading with real market data.
 
 A real-time dashboard lets you watch the agent think, trade, and manage risk live.
 

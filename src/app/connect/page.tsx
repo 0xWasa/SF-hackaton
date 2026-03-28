@@ -63,8 +63,8 @@ export default function ConnectPage() {
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
-            { name: "get_markets", desc: "All tradable coins + live prices", icon: "📊" },
-            { name: "get_orderbook", desc: "See all buy & sell orders for any coin", icon: "📖" },
+            { name: "get_markets", desc: "All tradable assets + live prices", icon: "📊" },
+            { name: "get_orderbook", desc: "See all buy & sell orders for any asset", icon: "📖" },
             { name: "get_portfolio", desc: "Wallet balance, active trades, profit & loss", icon: "💰" },
             { name: "get_candles", desc: "Historical price charts (open/high/low/close)", icon: "🕯️" },
             { name: "place_order", desc: "Buy or sell at market price or a set price", icon: "⚡" },
