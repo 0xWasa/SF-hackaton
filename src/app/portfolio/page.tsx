@@ -6,7 +6,7 @@ export default function PortfolioPage() {
       <div>
         <h1 className="text-2xl font-semibold">Portfolio</h1>
         <p className="text-sm text-muted mt-1">
-          Account balances and position details
+          Your agent&apos;s wallet — balances, active trades, and trade history
         </p>
       </div>
 
@@ -15,30 +15,30 @@ export default function PortfolioPage() {
         <Card title="Account Value">
           <p className="text-2xl font-semibold font-mono">$10,000.00</p>
         </Card>
-        <Card title="Margin Used">
+        <Card title="Funds in Active Trades">
           <p className="text-2xl font-semibold font-mono">$0.00</p>
-          <p className="text-sm text-muted mt-1">0% utilized</p>
+          <p className="text-sm text-muted mt-1">0% of wallet committed</p>
         </Card>
-        <Card title="Unrealized P&L">
+        <Card title="Unrealized Profit & Loss">
           <p className="text-2xl font-semibold font-mono text-muted">$0.00</p>
         </Card>
       </div>
 
       {/* Positions */}
-      <Card title="Open Positions" subtitle="Currently held positions">
+      <Card title="Active Trades" subtitle="Bets the lobster currently has on the table">
         <div className="flex items-center justify-center py-16 text-sm text-muted/40">
           <div className="text-center">
             <span className="text-5xl block mb-3">🦞</span>
-            <p>No open positions</p>
-            <p className="text-xs mt-1">Start the trading agent to open positions</p>
+            <p>No active trades yet</p>
+            <p className="text-xs mt-1">Start the agent and it will place trades here automatically</p>
           </div>
         </div>
       </Card>
 
       {/* Trade History */}
-      <Card title="Trade History" subtitle="Recent fills and executions">
+      <Card title="Trade History" subtitle="Completed trades and their results">
         <div className="flex items-center justify-center py-12 text-sm text-muted/40">
-          No trades yet
+          No trades yet — the lobster is still warming up
         </div>
       </Card>
     </div>

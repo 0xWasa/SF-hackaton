@@ -17,11 +17,11 @@ export default function MarketsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Markets</h1>
         <p className="text-sm text-muted mt-1">
-          Live prices from Hyperliquid Testnet
+          Real-time crypto prices from the trading platform — this is what the lobsters see
         </p>
       </div>
 
-      <Card title="All Markets" subtitle="Click a row to view orderbook">
+      <Card title="All Markets" subtitle="Click a row to see its buy & sell orders">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
