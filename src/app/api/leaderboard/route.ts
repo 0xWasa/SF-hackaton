@@ -7,7 +7,7 @@ export async function GET() {
     const leaderboard = await engine.getLeaderboard();
 
     return NextResponse.json({ leaderboard });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ leaderboard: [] });
   }
 }

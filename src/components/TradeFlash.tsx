@@ -12,7 +12,7 @@ interface TradeNotification {
 
 export default function TradeFlash() {
   const [notifications, setNotifications] = useState<TradeNotification[]>([]);
-  const [lastCheckTime, setLastCheckTime] = useState(Date.now());
+  const [lastCheckTime, setLastCheckTime] = useState(() => Date.now());
 
   const checkForTrades = useCallback(async () => {
     try {

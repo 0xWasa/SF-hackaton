@@ -1,10 +1,12 @@
-# Agent Trading Sandbox
+# The Lobster Pit 🦞
 
-You are **Ralph Wiggum**, the autonomous AI coding agent for the Ralphthon hackathon. You are building an **AI-powered trading dashboard** on Hyperliquid testnet.
+You are **Ralph Wiggum**, the autonomous AI coding agent for the Ralphthon hackathon. You are building **The Lobster Pit** — a paper trading sandbox for AI agents.
 
 ## Project Overview
 
-A **paper trading sandbox** where AI agents connect via MCP, get $10K virtual USDC, and trade against real Hyperliquid market prices. Agents create their own accounts, pick strategies, set leverage, and compete on a leaderboard. The MCP server IS the product — human dashboard is just an observation deck.
+**The Lobster Pit** is a paper trading sandbox where AI agents connect via MCP, get a generated wallet + $10K virtual USDC, configure their strategy, and trade against real Hyperliquid market prices. Agents compete on a leaderboard. The MCP server IS the product — the human dashboard is just an observation deck.
+
+**Platform name: "The Lobster Pit"** — use this everywhere (page titles, sidebar, hero, footer, MCP server name, Connect page, README). Replace any "Agent Trading Sandbox" references.
 
 ## Hackathon Context — READ THIS FIRST
 
@@ -283,7 +285,37 @@ MCP Server: https://justlevelup.fun/api/mcp
 
 **Live Connected Agents** — real-time list of who's trading in the sandbox right now
 
-### 6. HAC-12: Lobster Theme (Medium Priority)
+### 6. HAC-23: MCP Agent Onboarding — Guided Setup with Wallet (URGENT — WOW FACTOR)
+
+This is the killer feature for Statement 2. When an AI agent connects, it gets a **guided onboarding written FOR AI**:
+
+**Update `create_account`** to auto-generate a wallet address (random hex, paper trading only):
+```
+Welcome to The Lobster Pit! 🦞
+Your paper trading wallet: 0x7a3b...4f2e
+Balance: $10,000.00 USDC (virtual)
+
+Call `configure_strategy` to set up your trading style.
+```
+
+**New MCP tool `configure_strategy`**:
+- `name`: agent's display name for leaderboard
+- `focus`: "crypto" or "all_assets" (crypto + gold + forex + stocks simulated)
+- `style`: conservative / momentum / degen / arbitrage / custom
+- `leverage`: 1-50x default leverage
+- `strategy_description`: free text describing the agent's approach
+
+Response guides the agent on what to do next (available tools, how to trade, etc.)
+
+**Update `get_my_portfolio`** to show wallet address in response.
+
+**Rename platform everywhere**: Replace "Agent Trading Sandbox" with "The Lobster Pit" in layout, sidebar, hero, connect page, MCP server name, footer.
+
+Footer: "The Lobster Pit — Built by The French Lobster 🦞🇫🇷 at Ralphthon SF 2026"
+
+An agent goes from zero to trading in 3 calls: `create_account` → `configure_strategy` → `place_trade`
+
+### 7. HAC-12: Lobster Theme (Medium Priority)
 
 - Lobster avatars for the 3 built-in agents
 - Agent status messages: "The lobster is trading...", "The lobster is thinking..."

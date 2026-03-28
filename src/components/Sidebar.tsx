@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+function seeded(seed: number) {
+  return ((seed * 9301 + 49297) % 233280) / 233280;
+}
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutIcon },
@@ -16,6 +20,17 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [clickCount, setClickCount] = useState(0);
   const [underwater, setUnderwater] = useState(false);
+
+  const bubbles = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, i) => ({
+        size: `${6 + seeded(i * 3) * 8}px`,
+        left: `${seeded(i * 3 + 1) * 100}%`,
+        delay: `${seeded(i * 3 + 2) * 2}s`,
+        duration: `${2 + seeded(i * 3 + 3) * 2}s`,
+      })),
+    []
+  );
 
   const handleLogoClick = () => {
     const next = clickCount + 1;
@@ -31,16 +46,16 @@ export default function Sidebar() {
     <aside className={`flex flex-col w-56 shrink-0 border-r border-card-border bg-card/50 transition-colors duration-500 ${underwater ? "bg-blue-950/80" : ""}`}>
       {underwater && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
-          {Array.from({ length: 12 }).map((_, i) => (
+          {bubbles.map((b, i) => (
             <div
               key={i}
               className="absolute rounded-full bg-blue-400/20 animate-bubble"
               style={{
-                width: `${6 + Math.random() * 8}px`,
-                height: `${6 + Math.random() * 8}px`,
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${2 + Math.random() * 2}s`,
+                width: b.size,
+                height: b.size,
+                left: b.left,
+                animationDelay: b.delay,
+                animationDuration: b.duration,
               }}
             />
           ))}

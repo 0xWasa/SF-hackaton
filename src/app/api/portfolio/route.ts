@@ -25,7 +25,7 @@ export async function GET() {
         totalTrades,
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({
       portfolios: [],
       summary: { totalAgents: 0, totalValue: 0, totalPnl: 0, totalTrades: 0 },

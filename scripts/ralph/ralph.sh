@@ -1,15 +1,16 @@
 #!/bin/bash
 # Ralph Loop — autonomous AI agent that runs Claude Code repeatedly
-# until all tasks are complete. Based on Geoffrey Huntley's Ralph pattern.
+# until all tasks are complete. Streams output live.
 #
 # Usage: ./scripts/ralph/ralph.sh [max_iterations]
 # Default: 20 iterations
 
-set -euo pipefail
+set -uo pipefail
 
 MAX_ITERATIONS=${1:-20}
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+TMPFILE=$(mktemp /tmp/ralph-output.XXXXXX)
 
 cd "$PROJECT_DIR"
 
@@ -20,15 +21,14 @@ RALPH_QUOTES=(
     "I bent my Wookie..."
     "My cat's breath smells like cat food."
     "I found a moon rock in my nose!"
-    "The doctor said I wouldn't have so many nose bleeds if I kept my finger outta there."
     "I'm Idaho!"
     "That's where I saw the leprechaun. He told me to burn things."
     "When I grow up, I wanna be a principal or a caterpillar."
-    "My knob tastes funny."
-    "I eated the purple berries..."
-    "Even my boogers are sad."
-    "I'm a unitard!"
     "Go banana!"
+    "I'm a unitard!"
+    "Even my boogers are sad."
+    "I eated the purple berries..."
+    "The doctor said I wouldn't have so many nose bleeds if I kept my finger outta there."
 )
 
 echo ""
@@ -41,58 +41,58 @@ echo "  ⠀⢿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡾⠀⠀"
 echo "  ⠀⠀⠻⣄⠀⠀⠈⠉⠉⠉⠉⠁⠀⠀⢀⣴⠟⠀⠀⠀"
 echo "  ⠀⠀⠀⠈⠛⠶⣤⣀⣀⣀⣀⣤⠶⠛⠉⠀⠀⠀⠀⠀"
 echo ""
-echo "  ╔══════════════════════════════════════╗"
-echo "  ║  🦞 RALPH WIGGUM — AUTONOMOUS MODE  ║"
-echo "  ║  \"I'm helping!\"                      ║"
-echo "  ╠══════════════════════════════════════╣"
-echo "  ║  Project: $(basename "$PROJECT_DIR")               ║"
-echo "  ║  Max iterations: $MAX_ITERATIONS                    ║"
-echo "  ╚══════════════════════════════════════╝"
+echo "  ╔══════════════════════════════════════════╗"
+echo "  ║  🦞 RALPH WIGGUM — AUTONOMOUS MODE 🦞   ║"
+echo "  ║  Team: The French Lobster 🇫🇷             ║"
+echo "  ║  \"I'm helping!\"                          ║"
+echo "  ╠══════════════════════════════════════════╣"
+echo "  ║  Max iterations: $MAX_ITERATIONS                        ║"
+echo "  ╚══════════════════════════════════════════╝"
 echo ""
 
 for i in $(seq 1 $MAX_ITERATIONS); do
-    # Pick a random Ralph quote
     QUOTE="${RALPH_QUOTES[$((RANDOM % ${#RALPH_QUOTES[@]}))]}"
 
     echo ""
     echo "  🦞━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🦞"
-    echo "  ┃ Ralph Iteration $i of $MAX_ITERATIONS"
-    echo "  ┃ $(date '+%Y-%m-%d %H:%M:%S')"
+    echo "  ┃ Iteration $i of $MAX_ITERATIONS"
+    echo "  ┃ $(date '+%H:%M:%S')"
     echo "  ┃ Ralph says: \"$QUOTE\""
     echo "  🦞━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🦞"
     echo ""
 
-    # Run Claude Code with the CLAUDE.md as context
-    # --dangerously-skip-permissions: no human approval needed
-    # --print: output mode (non-interactive)
-    OUTPUT=$(claude --dangerously-skip-permissions --print \
-        "Read CLAUDE.md for full context. Check git log and current code to understand what's already done. Work on the next incomplete task in order (HAC-8 through HAC-11). Implement it fully, run 'npm run build' to verify, commit your work, then output <promise>COMPLETE</promise> ONLY if ALL tasks in CLAUDE.md are finished. If there are still tasks remaining, just stop after committing — you'll be restarted with fresh context." \
-        2>&1 | tee /dev/stderr) || true
+    # Clear temp file
+    > "$TMPFILE"
+
+    # Run Claude Code with script to force PTY (enables live streaming on macOS)
+    PROMPT="Read CLAUDE.md for full context. Check git log and current code to understand what's already done. Work on the next incomplete task in order. Implement it fully, run 'npm run build' to verify, commit and deploy your work (push to git + deploy to server as described in CLAUDE.md). Output <promise>COMPLETE</promise> ONLY if ALL tasks in CLAUDE.md are finished. If there are still tasks remaining, just stop after committing and deploying."
+    script -q "$TMPFILE" bash -c "claude --dangerously-skip-permissions -p \"$PROMPT\" 2>&1"
 
     # Check for completion signal
-    if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
+    if grep -q "<promise>COMPLETE</promise>" "$TMPFILE"; then
         echo ""
         echo "  🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆"
         echo "  ┃                                       ┃"
-        echo "  ┃   RALPH COMPLETED ALL TASKS!           ┃"
+        echo "  ┃   RALPH COMPLETED ALL TASKS! 🎉        ┃"
         echo "  ┃   \"I'm a winner!\"                      ┃"
-        echo "  ┃   Finished at iteration $i/$MAX_ITERATIONS"
-        echo "  ┃   $(date '+%Y-%m-%d %H:%M:%S')         ┃"
+        echo "  ┃   Iteration $i/$MAX_ITERATIONS — $(date '+%H:%M:%S')        ┃"
+        echo "  ┃   Team: The French Lobster 🦞🇫🇷         ┃"
         echo "  ┃                                       ┃"
         echo "  🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆"
+        rm -f "$TMPFILE"
         exit 0
     fi
 
     echo ""
-    echo "  🦞 Iteration $i done. Ralph is restarting with fresh context..."
-    sleep 2
+    echo "  🦞 Iteration $i done. Ralph is restarting with fresh brain..."
+    sleep 3
 done
 
 echo ""
-echo "  ╔══════════════════════════════════════╗"
-echo "  ║  🦞 Ralph hit max iterations ($MAX_ITERATIONS)    ║"
-echo "  ║  \"I tried my best and failed.         ║"
-echo "  ║   The lesson is: never try.\"          ║"
-echo "  ║  Check git log to see progress.      ║"
-echo "  ╚══════════════════════════════════════╝"
+echo "  ╔══════════════════════════════════════════╗"
+echo "  ║  🦞 Ralph hit max iterations ($MAX_ITERATIONS)        ║"
+echo "  ║  \"I tried and failed. The lesson is:     ║"
+echo "  ║   never try.\" — Homer Simpson            ║"
+echo "  ╚══════════════════════════════════════════╝"
+rm -f "$TMPFILE"
 exit 1
