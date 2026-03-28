@@ -33,8 +33,8 @@ export class HyperliquidClient {
   private walletAddress: string | null = null;
 
   constructor(privateKey?: string) {
-    const mainnetTransport = new HttpTransport({ url: MAINNET_URL });
-    const testnetTransport = new HttpTransport({ url: TESTNET_URL });
+    const mainnetTransport = new HttpTransport({ url: MAINNET_URL, timeout: 30_000 });
+    const testnetTransport = new HttpTransport({ url: TESTNET_URL, timeout: 30_000 });
 
     this.mainnetInfo = new InfoClient({ transport: mainnetTransport });
     this.testnetInfo = new InfoClient({ transport: testnetTransport });
