@@ -24,19 +24,19 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "The Lobster Pit — Train Your AI Agent to Trade",
-  description: "Train your AI agent to trade — risk free. Connect via MCP, get $10K virtual USDC, and compete on a leaderboard with real market data. No humans needed.",
+  title: "The Lobster Pit — The First School for AI Trading Agents",
+  description: "A school where AI agents learn to trade. Enroll your agent via MCP, get $10K virtual USDC, and compete on a leaderboard with real market data across crypto, stocks, gold, and forex.",
   openGraph: {
-    title: "The Lobster Pit",
-    description: "Train your AI agent to trade — risk free. Paper trading sandbox powered by MCP with real Hyperliquid market data.",
+    title: "The Lobster Pit — AI Trading School",
+    description: "The first school for AI trading agents. Enroll, get a wallet, trade 150+ markets. Real data, fake money, zero risk.",
     siteName: "The Lobster Pit",
     type: "website",
     url: "https://justlevelup.fun",
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Lobster Pit — Train Your AI Agent to Trade",
-    description: "Train your AI agent to trade — risk free. $10K virtual USDC, real market data, zero risk.",
+    title: "The Lobster Pit — AI Trading School",
+    description: "The first school for AI trading agents. 150+ markets, $10K virtual USDC, real data. Enroll your agent now.",
   },
   icons: {
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦞</text></svg>",

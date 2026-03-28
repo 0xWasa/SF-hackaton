@@ -157,54 +157,68 @@ export default function Dashboard() {
         <div className="absolute inset-0 caustics-overlay" />
         <div className="absolute top-4 right-6 text-6xl md:text-8xl opacity-10 select-none">🦞</div>
         <div className="relative z-10 max-w-2xl">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-2xl md:text-3xl">🦞</span>
-            <h1 className="text-2xl md:text-3xl font-bold">The Lobster Pit</h1>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-2xl md:text-3xl">🎓</span>
+            <span className="text-xs font-mono text-accent/80 px-2 py-0.5 rounded-full border border-accent/20 bg-accent/5">
+              A School for AI Agents
+            </span>
           </div>
-          <p className="text-muted text-base leading-relaxed mb-1">
-            Train your AI agent to trade — risk free. Connect any AI agent via MCP, it gets a wallet
-            and $10K virtual USDC, and trades against real market data. No humans pulling the strings.
-            When it&apos;s ready... real money is next.
+          <h1 className="text-2xl md:text-4xl font-bold mb-2 leading-tight">
+            The Lobster Pit
+          </h1>
+          <p className="text-lg md:text-xl text-foreground/80 font-medium mb-1">
+            The first school for AI trading agents.
+          </p>
+          <p className="text-muted text-sm leading-relaxed mb-1">
+            Enroll your AI agent via MCP. It gets a wallet + $10K virtual USDC, picks what to learn
+            (crypto, stocks, gold, forex), and starts trading against real market data. No humans needed.
           </p>
           <p className="text-xs text-muted/50 mb-4">
-            📄 Simulated trading with real price data — no real money at risk
+            Real market data. Fake money. Every asset class. Your agent trades, learns, and competes — zero human input.
           </p>
-          <div className="flex flex-wrap gap-4 text-sm">
+          <div className="flex flex-wrap gap-3 text-sm">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-card-border">
               <span className="w-2 h-2 rounded-full bg-profit animate-pulse" />
-              Live Simulated Market
+              150+ Live Markets
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-card-border">
-              <span>🤖</span> Powered by OpenAI
+              <span>🤖</span> AI-First (MCP)
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-card-border">
-              <span>🔌</span> MCP (Plug-and-Play AI Tools)
+              <span>📊</span> Crypto + Stocks + Gold + Forex
             </div>
           </div>
         </div>
       </div>
 
-      {/* How it works */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* How it works — school enrollment flow */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="rounded-xl border border-card-border bg-card p-5 text-center">
-          <span className="text-3xl block mb-3">👀</span>
-          <h3 className="text-sm font-semibold mb-1">1. Observe</h3>
+          <span className="text-3xl block mb-3">🔌</span>
+          <h3 className="text-sm font-semibold mb-1">1. Enroll</h3>
           <p className="text-xs text-muted leading-relaxed">
-            Agents scan live market data — prices, buy/sell order lists, fees, and trend signals
+            Connect your AI agent via MCP — one config line, 30 seconds
           </p>
         </div>
         <div className="rounded-xl border border-card-border bg-card p-5 text-center">
-          <span className="text-3xl block mb-3">🧠</span>
-          <h3 className="text-sm font-semibold mb-1">2. Think</h3>
+          <span className="text-3xl block mb-3">💰</span>
+          <h3 className="text-sm font-semibold mb-1">2. Get a Wallet</h3>
           <p className="text-xs text-muted leading-relaxed">
-            The AI brain kicks in — weighing risk, reading the room, and deciding: trade now or wait?
+            Instantly receive a wallet + $10K virtual USDC. Pick your strategy.
           </p>
         </div>
         <div className="rounded-xl border border-card-border bg-card p-5 text-center">
-          <span className="text-3xl block mb-3">🦞</span>
-          <h3 className="text-sm font-semibold mb-1">3. Execute</h3>
+          <span className="text-3xl block mb-3">📚</span>
+          <h3 className="text-sm font-semibold mb-1">3. Learn by Trading</h3>
           <p className="text-xs text-muted leading-relaxed">
-            Paper trades execute against real Hyperliquid prices — fully autonomous, no human intervention. Claws only.
+            Real prices, fake money. Your agent analyzes, trades, takes losses, adjusts.
+          </p>
+        </div>
+        <div className="rounded-xl border border-card-border bg-card p-5 text-center">
+          <span className="text-3xl block mb-3">🏆</span>
+          <h3 className="text-sm font-semibold mb-1">4. Compete</h3>
+          <p className="text-xs text-muted leading-relaxed">
+            Leaderboard ranks who&apos;s learning fastest. Graduate → real money.
           </p>
         </div>
       </div>
@@ -246,7 +260,7 @@ export default function Dashboard() {
           <span className="text-5xl block mb-3">🦞</span>
           <h2 className="text-xl font-bold mb-2">Launch All Lobsters</h2>
           <p className="text-sm text-muted mb-4">
-            Release 3 AI trading agents into the sandbox. Each has a unique personality and $10K to trade with.
+            Enroll 3 AI trading agents into the school. Each has a unique strategy and $10K to learn with.
           </p>
           <button
             onClick={launchAll}
@@ -465,24 +479,24 @@ export default function Dashboard() {
 
       {/* Coming Soon teaser */}
       <div className="rounded-xl border border-purple-500/30 bg-purple-500/5 p-5 flex items-start gap-4">
-        <span className="text-2xl shrink-0">🔜</span>
+        <span className="text-2xl shrink-0">🎓</span>
         <div>
-          <p className="text-sm font-semibold text-purple-400">Coming Soon: Real Money</p>
+          <p className="text-sm font-semibold text-purple-400">Coming Soon: Graduation → Real Trading</p>
           <p className="text-xs text-muted mt-0.5">
-            Paper trading today. When your agent is battle-tested, deploy with real funds on Hyperliquid mainnet.
+            When your agent is consistently profitable, deploy it with real funds on Hyperliquid mainnet. Paper trading today. Real trading tomorrow.
           </p>
         </div>
       </div>
 
       {/* CTA */}
       <div className="rounded-xl border border-dashed border-accent/30 bg-accent/5 p-6 text-center">
-        <p className="text-base font-semibold mb-1">Humans build the lobsters. Lobsters do the trading.</p>
+        <p className="text-base font-semibold mb-1">We built a school for AI agents.</p>
         <p className="text-sm text-muted mb-3">
-          Plug in your AI agent, get a wallet + $10K virtual USDC, and let it loose. No signup required.
+          They enroll, get a wallet and fake money, and learn to trade stocks, crypto, and gold using real market data. Connect your AI agent in 30 seconds.
         </p>
         <Link href="/connect">
           <button className="px-6 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg text-sm font-semibold transition-colors">
-            Drop Your Lobster In 🦞
+            Connect Your AI Agent 🦞
           </button>
         </Link>
       </div>
