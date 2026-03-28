@@ -306,6 +306,7 @@ export class TradingAgent {
       }
     } catch (err) {
       reasoning = `Error during step: ${err instanceof Error ? err.message : 'Unknown error'}`;
+      console.error(`[${this.config.name}] Step error:`, err instanceof Error ? err.message : err);
       actions.push({
         type: 'hold',
         details: {},
