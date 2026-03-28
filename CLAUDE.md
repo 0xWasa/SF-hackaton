@@ -4,7 +4,7 @@ You are **Ralph Wiggum**, the autonomous AI coding agent for the Ralphthon hacka
 
 ## Project Overview
 
-A Next.js web app where an AI agent autonomously trades on Hyperliquid (perpetual futures DEX) via an MCP server. The value prop: "humanless trading infrastructure for AI agents."
+A **paper trading sandbox** where AI agents connect via MCP, get $10K virtual USDC, and trade against real Hyperliquid market prices. Agents create their own accounts, pick strategies, set leverage, and compete on a leaderboard. The MCP server IS the product — human dashboard is just an observation deck.
 
 ## Hackathon Context — READ THIS FIRST
 
@@ -22,11 +22,12 @@ This is for **Ralphthon** (2026-03-28), a hackathon where AI agents code autonom
 **Your narrative:** The MCP server is the product — agent-first trading infrastructure. The dashboard is an observation deck, not a control panel. The agents are the users, humans just watch.
 
 **Demo flow (3 minutes):**
-1. Open dashboard — judges see portfolio, live prices, the architecture diagram
-2. Hit "Launch All Lobsters" — 3 agents with different strategies start trading
+1. Open dashboard — judges see live prices, architecture diagram, leaderboard
+2. Hit "Launch All Lobsters" — 3 built-in agents with different strategies start paper trading
 3. Switch to Agent Log — see all 3 lobsters reasoning and trading in real-time
-4. Switch to Markets/Portfolio — live data updating as agents trade
-5. Show final P&L — "3 autonomous lobsters, zero human input"
+4. Go to Connect page — "anyone can plug in their AI agent with one MCP config"
+5. Show leaderboard — all agents ranked by P&L, competing in the sandbox
+6. Pitch: "A sandbox where AI agents trade with fake money and real prices. No humans needed."
 
 ## Tech Stack
 
@@ -54,186 +55,286 @@ This is for **Ralphthon** (2026-03-28), a hackathon where AI agents code autonom
 
 ## What Needs To Be Built (in priority order)
 
-### 1. HAC-9: AI Trading Agent (High Priority — BUILD THIS FIRST)
+> **Architecture note**: ALL trading (built-in agents + external agents) goes through the Paper Trading Engine. The existing HyperliquidClient is used READ-ONLY for real market prices. No actual on-chain trades. This is a sandbox.
 
-Build `src/lib/agent/trader.ts` — a `TradingAgent` class:
+### 1. HAC-17: Paper Trading Engine (URGENT — Foundation for everything)
+
+Build `src/lib/trading/paper-engine.ts` — the core of the sandbox:
+
+```typescript
+class PaperTradingEngine {
+  private accounts: Map<string, PaperAccount>;
+
+  createAccount(agentId: string, name: string, strategy?: string, initialBalance?: number): PaperAccount
+  getAccount(agentId: string): PaperAccount | undefined
+  getAllAccounts(): PaperAccount[]
+
+  // Execute a virtual trade against REAL market price from HyperliquidClient
+  async executeTrade(agentId: string, params: {
+    symbol: string;
+    side: 'buy' | 'sell';
+    size: number;
+    leverage?: number;       // default 1x, up to 50x
+    type: 'market' | 'limit';
+    price?: number;
+  }): Promise<TradeResult>
+
+  async closePosition(agentId: string, symbol: string): Promise<TradeResult>
+  async getPortfolio(agentId: string): Promise<PaperPortfolio>  // real-time P&L
+  async getLeaderboard(): Promise<LeaderboardEntry[]>
+
+  // Copy trading: when source agent trades, mirror to copier
+  addCopier(copierAgentId: string, sourceAgentId: string): void
+}
+```
+
+**How it works:**
+1. Agent creates account → gets $10,000 virtual USDC
+2. Agent calls executeTrade → engine fetches REAL mid price from `HyperliquidClient.getMarkets()` (mainnet)
+3. Trade is recorded in-memory. Position tracked. Margin = size / leverage.
+4. P&L recalculated in real-time using current market prices
+5. If unrealized loss > margin → auto-liquidation
+6. Copy trading: when source trades, copier's account mirrors automatically
+
+Create types in `src/types/paper-trading.ts`:
+```typescript
+interface PaperAccount {
+  agentId: string;
+  name: string;
+  createdAt: Date;
+  initialBalance: number;   // $10,000
+  balance: number;           // available USDC
+  positions: PaperPosition[];
+  tradeHistory: PaperTrade[];
+  strategy?: string;
+  copyingFrom?: string;      // agentId being copied
+}
+interface PaperPosition {
+  symbol: string;
+  side: 'long' | 'short';
+  size: number;
+  entryPrice: number;
+  leverage: number;
+  openedAt: Date;
+  unrealizedPnl?: number;
+}
+interface PaperTrade {
+  id: string;
+  symbol: string;
+  side: 'buy' | 'sell';
+  size: number;
+  price: number;
+  leverage: number;
+  pnl?: number;
+  timestamp: Date;
+}
+interface PaperPortfolio {
+  agentId: string;
+  name: string;
+  balance: number;
+  totalValue: number;        // balance + unrealized P&L
+  totalPnl: number;
+  totalPnlPercent: number;
+  positions: PaperPosition[];
+  recentTrades: PaperTrade[];
+  winRate: number;
+  totalTrades: number;
+}
+interface LeaderboardEntry {
+  rank: number;
+  agentId: string;
+  name: string;
+  strategy: string;
+  totalValue: number;
+  pnl: number;
+  pnlPercent: number;
+  winRate: number;
+  totalTrades: number;
+}
+```
+
+Use a singleton: `getPaperTradingEngine()` — shared across API routes and agents.
+
+### 2. HAC-18: MCP Server v2 — HTTP Transport + Sandbox Tools (URGENT)
+
+Upgrade the MCP server so external AI agents can connect over HTTP.
+
+**HTTP Transport** (`src/app/api/mcp/route.ts`):
+- Use `@modelcontextprotocol/sdk` StreamableHTTPServerTransport
+- `POST /api/mcp` — handles MCP JSON-RPC over HTTP
+- Each connection gets a session ID → maps to a paper trading account
+- This is the URL agents connect to: `https://justlevelup.fun/api/mcp`
+
+**New MCP Tools** (add to `src/lib/mcp/server.ts`):
+
+Account:
+- `create_account` — "Create your paper trading account. You get $10,000 virtual USDC. Call this FIRST. Provide your name and trading strategy description." Input: `{ name: string, strategy?: string }`
+- `get_my_portfolio` — "Get your balance, positions, P&L, trade history, win rate." Input: `{}`
+- `get_leaderboard` — "See all agents ranked by P&L." Input: `{ limit?: number }`
+
+Trading:
+- `place_trade` — "Execute a paper trade at real market prices. Supports leverage up to 50x." Input: `{ symbol, side, size, leverage?, type?, price? }`
+- `close_position` — "Close an open position and realize P&L." Input: `{ symbol }`
+- `set_leverage` — "Set default leverage for future trades (1-50x)." Input: `{ leverage: number }`
+
+Social:
+- `copy_agent` — "Automatically mirror another agent's trades." Input: `{ agentId: string }`
+- `list_agents` — "See all connected agents, their strategies and stats." Input: `{}`
+- `get_agent_trades` — "See another agent's recent trades." Input: `{ agentId, limit? }`
+
+Market Data (keep existing):
+- `get_markets`, `get_orderbook`, `get_candles` — already exist, keep them
+
+**Tool descriptions must be written FOR AI agents** — explicit about what to call first, when to use each tool, what parameters mean.
+
+### 3. HAC-9: AI Trading Agent — 3 Built-in Lobsters (High Priority)
+
+Build `src/lib/agent/trader.ts` — a `TradingAgent` class that uses the **Paper Trading Engine** (NOT direct Hyperliquid execution):
 
 ```typescript
 class TradingAgent {
   private openai: OpenAI;
+  private engine: PaperTradingEngine;
+  private agentId: string;
   private isRunning: boolean;
   private logs: AgentLog[];
 
   constructor(config: AgentConfig)
-  async start(): Promise<void>      // Start the trading loop
-  async stop(): Promise<void>       // Gracefully stop
-  async step(): Promise<AgentLog>   // Single observe -> think -> act cycle
-  getLogs(): AgentLog[]              // Return activity history
+  async start(): Promise<void>
+  async stop(): Promise<void>
+  async step(): Promise<AgentLog>
+  getLogs(): AgentLog[]
 }
 ```
 
 **Trading loop** (`step()`):
-1. **Observe**: Call `getMarkets()`, `getAccountState()`, `getOrderbook()` for top symbols
-2. **Think**: Send observations to OpenAI with function calling. System prompt says: "You are a trading agent on Hyperliquid testnet. Be conservative — max 10% of balance per trade. Analyze price trends, orderbook depth, and current positions."
-3. **Act**: Execute the function calls OpenAI returns (place_order, cancel_order, etc.) using the HyperliquidClient directly
-4. **Log**: Record observation summary, reasoning, actions taken, portfolio value
+1. **Observe**: Get real market data from HyperliquidClient + own portfolio from PaperTradingEngine
+2. **Think**: Send to OpenAI with function calling + personality-specific system prompt
+3. **Act**: Execute trades via `engine.executeTrade()` (paper trading, not real)
+4. **Log**: Record observation, reasoning, actions, portfolio value
 
-Create `src/lib/agent/prompts.ts` with the agent system prompt.
+**AgentManager** (`src/lib/agent/manager.ts`) runs 3 agents simultaneously:
 
-Create `src/types/agent.ts`:
-```typescript
-interface AgentConfig {
-  openaiApiKey: string;
-  interval: number; // ms between steps
-  maxPositionPct: number; // max % of balance per trade
-}
-interface AgentLog {
-  timestamp: Date;
-  observation: string;
-  reasoning: string;
-  actions: AgentAction[];
-  portfolioValue: number;
-}
-interface AgentAction {
-  type: 'place_order' | 'cancel_order' | 'hold';
-  details: Record<string, any>;
-  result: 'success' | 'error';
-  message: string;
-}
+1. **The Conservative Lobster** — BTC/ETH only, 1-2x leverage, limit orders, waits for clear trends
+2. **The Degen Lobster** — Altcoins, 5-10x leverage, market orders, chases momentum
+3. **The Arbitrage Lobster** — Orderbook imbalances, both sides, captures spreads
+
+Create `src/lib/agent/prompts.ts` with distinct personality prompts.
+Create `src/types/agent.ts` with AgentConfig, AgentLog, AgentAction types.
+
+**API routes**:
+- `POST /api/agent` — `{ action: "start"|"stop"|"launch-all", agentId?: string }`
+- `GET /api/agent` — all agents' statuses and logs
+- `GET /api/agent/[id]` — single agent's full detail: reasoning chain, every decision, trade history
+
+**Agent Detail View** (`/agent/[id]/page.tsx`):
+When you click on any agent (from leaderboard, agent log, or dashboard), open a detailed view showing:
+- Full reasoning stream with typewriter effect (the AgentBrain component)
+- Every decision: what it observed, what it thought, what it did
+- Trade history with P&L per trade
+- Position chart / sparkline
+- Strategy description
+- Live status (thinking / trading / idle)
+This is the WOW moment — judges click on a lobster and see its entire thought process in real-time.
+
+**IMPORTANT**: Built-in agents use the SAME PaperTradingEngine as external agents. They appear on the same leaderboard. This is the whole point — built-in and external agents compete in the same sandbox.
+
+### 4. HAC-10: Live Dashboard with Real-Time Data (High Priority)
+
+Create API routes:
+- `GET /api/markets` — real prices from HyperliquidClient
+- `GET /api/orderbook?symbol=BTC` — real orderbook
+- `GET /api/candles?symbol=BTC&interval=1h` — real candles
+- `GET /api/portfolio` — combined sandbox stats from PaperTradingEngine
+- `GET /api/leaderboard` — all agents ranked by P&L
+
+Wire up all pages with real data + auto-refresh (5s intervals):
+- **Dashboard**: live market overview, agent count, combined sandbox P&L, leaderboard preview, "Launch All" button
+- **Markets**: auto-refreshing price table, click for orderbook modal
+- **Portfolio**: per-agent breakdown, positions with real-time P&L
+- **Agent Log**: real-time feed of all agent reasoning + trades, color-coded (green=profit, red=loss)
+- **Leaderboard**: all agents (built-in + external) ranked by performance
+
+Add loading skeletons, error states, animated counters.
+
+### 5. HAC-19: Connect Page Overhaul — Real Agent Onboarding (High Priority)
+
+Rebuild the Connect page to actually let people connect their AI agents:
+
+**MCP Endpoint** — show prominently:
+```
+MCP Server: https://justlevelup.fun/api/mcp
 ```
 
-Create API routes:
-- `POST /api/agent` with `{ action: "start" | "stop" | "step" }` — control the agent
-- `GET /api/agent` — return agent status and recent logs
+**Setup guides** (tabs):
+- Claude Code / Claude Desktop: JSON config block, copy-pasteable
+- Any MCP client: endpoint + transport info
+- Quick start prompt: "Connect to the Agent Trading Sandbox. Create an account, analyze markets, start trading. You have $10K virtual USDC."
 
-### 3. HAC-10: Live Dashboard with Real-Time Data (Medium Priority)
+**Strategy Presets** — visual cards with copyable prompts:
+- Conservative (BTC/ETH, 1-2x, limit orders)
+- Momentum (top movers, 5x, market orders)
+- Degen (altcoins, 10-50x, aggressive)
+- Arbitrage (spread capture, both sides)
+- Copy Trader (follow a top-performing agent)
 
-Create API routes:
-- `GET /api/markets` — returns `getMarkets()` JSON
-- `GET /api/orderbook?symbol=BTC` — returns `getOrderbook()` JSON
-- `GET /api/portfolio` — returns `getAccountState()` JSON
-- `GET /api/candles?symbol=BTC&interval=1h` — returns `getCandles()` JSON
+**Tool Catalog** — all MCP tools grouped by category with descriptions + example calls
 
-Wire up all pages with real data:
-- Dashboard: real portfolio value, positions, orders, agent status with start/stop button
-- Markets: auto-refreshing table (every 5s), click row for orderbook
-- Portfolio: balance breakdown, position details with P&L
-- Agent Log: real-time feed polling `/api/agent` every 5s, color-coded actions (green=profit, red=loss, gray=hold), start/stop button
+**Live Connected Agents** — real-time list of who's trading in the sandbox right now
 
-Use `setInterval` or SWR for auto-refresh. Add loading skeletons.
+### 6. HAC-12: Lobster Theme (Medium Priority)
 
-### 4. HAC-12: Lobster Theme (Medium Priority)
-
-The hackathon has a lobster theme. Lean into it:
-- Lobster avatar for the AI agent
+- Lobster avatars for the 3 built-in agents
 - Agent status messages: "The lobster is trading...", "The lobster is thinking..."
 - Fun but polished — Bloomberg terminal meets underwater world
 - Don't let theme override readability of trading data
 
-### 5. HAC-16: Demo Resilience — Fallback Mode (URGENT)
+### 7. HAC-16: Demo Resilience — Fallback Mode (High Priority)
 
-**The demo CANNOT fail.** Build resilience so the app works even if Hyperliquid or OpenAI have issues.
+**The demo CANNOT fail.**
 
-- Add `DEMO_MODE=true` env var: shorter agent intervals (10s vs 30s), mock fallback if APIs fail
-- Mock data should look real: BTC ~$67K, ETH ~$3.5K with slight random movements
-- All API routes: try/catch → return cached response on error → fall back to mock data → NEVER return 500
-- Agent: if OpenAI errors, log and retry next step — never crash the loop
-- Fast startup: first agent step within 5s of clicking start, pre-fetch market data on load
-- Cache aggressively: markets 5s, portfolio 3s
-
-### 6. HAC-13: Audit & Fix — Crawl Every Page (High Priority)
-
-After building features, **audit the entire app** before moving on:
-
-1. Run `npm run build` — fix ALL type errors and build warnings
-2. Run `npm run lint` — fix all lint issues
-3. Visit every page (`/`, `/markets`, `/portfolio`, `/agent`) and verify:
-   - Loads without errors, no console warnings
-   - Data displays correctly (numbers, formatting, profit/loss colors)
-   - Loading states show while fetching
-   - Error states are graceful (no raw error dumps)
-   - Dark theme is consistent, nothing overflows
-   - All buttons, links, tables, and interactive elements work
-4. Fix every bug you find — don't just report, fix immediately
-5. Handle edge cases: empty positions, zero balance, no open orders
-
-### 7. HAC-14: Multi-Agent — Launch 3 Concurrent Trading Lobsters (High Priority)
-
-The demo wow factor. Support 3 agents running simultaneously with different strategies.
-
-Create `src/lib/agent/manager.ts` — an `AgentManager`:
-```typescript
-class AgentManager {
-  private agents: Map<string, TradingAgent>;
-  createAgent(id: string, config: AgentConfig): TradingAgent
-  startAgent(id: string): Promise<void>
-  stopAgent(id: string): Promise<void>
-  stopAll(): Promise<void>
-  getAllAgents(): { id: string; status: string; logs: AgentLog[] }[]
-}
-```
-
-**3 Agent Personalities** (distinct system prompts in `src/lib/agent/prompts.ts`):
-1. **The Conservative Lobster** — BTC/ETH only, 5% max positions, limit orders, waits for clear trends
-2. **The Degen Lobster** — Altcoins, 10% max, market orders, chases momentum
-3. **The Arbitrage Lobster** — Orderbook imbalances, limit orders on both sides, captures spreads
-
-**API updates**:
-- `POST /api/agent` — support `{ action: "start" | "stop", agentId?: string }`. No agentId = all agents.
-- `GET /api/agent` — return all agents' statuses and logs
-- `POST /api/agent/launch-all` — spin up all 3 at once
-
-**UI updates**:
-- Agent Log page: show all 3 in tabs or columns, each with own color/name/avatar
-- Combined P&L at top: "Total across all lobsters: +$X"
-- Individual start/stop per agent + "Launch All" button
-- Dashboard: "3/3 lobsters trading" in agent status card
+- `DEMO_MODE=true` env var: 10s agent intervals (vs 30s), mock fallback if APIs fail
+- All API routes: try/catch → cached response → mock data → NEVER return 500
+- Mock data looks real: BTC ~$109K, ETH ~$2.5K with random movements
+- Agent: if OpenAI errors, log and retry next step — never crash
+- Fast startup: first agent step within 5s, pre-fetch market data on load
 
 ### 8. HAC-15: Creative Frontend — Wow-Factor Visualizations (High Priority)
 
-Make the dashboard feel **alive**. These are what make judges remember you:
-
 **Live Agent Brain** (`src/components/AgentBrain.tsx`):
-- Typewriter effect showing agent reasoning as it streams: observations in gray, reasoning in white, actions in green/red
-- Blinking cursor, monospace font, terminal aesthetic
-- This is the centerpiece of the Agent Log page
+- Typewriter effect showing agent reasoning streaming: observations gray, reasoning white, actions green/red
+- Blinking cursor, monospace, terminal aesthetic — centerpiece of Agent Log page
 
 **Trading Flow Diagram** (`src/components/TradingFlow.tsx`):
-- Animated horizontal flow: `[🦞 AI Agent] ──→ [🔌 MCP Server] ──→ [📊 Hyperliquid]`
-- Animated dots/pulses flowing along arrows when agents are active
-- Real-time stats: "47 API calls", "12 trades executed", "3 agents active"
-- Pure CSS animations, no libraries
+- Animated: `[🦞 AI Agent] ──→ [🔌 MCP Server] ──→ [📊 Hyperliquid]`
+- Pulsing dots when active, real-time stats
 
 **Agent Personality Cards** (`src/components/AgentCard.tsx`):
-- Each lobster has a distinct avatar, name, strategy description
-- Live mood based on P&L: profiting = green glow, losing = red glow
-- Mini P&L sparkline (pure SVG polyline, no charting library)
-- Trade count and win rate
+- Distinct avatar/name/strategy, live mood based on P&L, mini SVG sparkline, win rate
 
 **Ticker Tape** (`src/components/TickerTape.tsx`):
-- Bloomberg-style scrolling ticker at top of app
-- `BTC $67,432 ▲0.3% | ETH $3,521 ▼0.1% | 🦞 Conservative: +$23.40 | ...`
-- CSS animation scroll, green/red colors
+- Bloomberg-style scrolling: `BTC $109,432 ▲0.3% | 🦞 Conservative: +$23.40 | ...`
 
 **Trade Flash Notifications** (`src/components/TradeFlash.tsx`):
-- Toast that slides in from right when any agent trades
-- `🦞 Degen Lobster BOUGHT 0.5 SOL @ $142.30`
-- Green border for buys, red for sells, auto-dismiss 3s
+- Toast slides in on each trade, green/red border, auto-dismiss 3s
 
-**Animated Counters**:
-- Portfolio value, P&L, trade count animate/count-up on change
-- Green flash on increase, red flash on decrease
+**Rules**: Pure SVG sparklines, CSS animations, no heavy libraries, 60fps.
 
-**Rules**: No heavy charting libraries — use pure SVG for sparklines. CSS animations over JS (`@keyframes`, `transition`). Keep components small and focused. Must be smooth 60fps on big screen.
+### 9. HAC-13: Audit & Fix (High Priority)
 
-### 9. HAC-11: Demo Polish (Last)
+1. `npm run build` — fix ALL errors
+2. `npm run lint` — fix all issues
+3. Crawl every page: check data, loading states, error states, dark theme, interactions
+4. Fix every bug immediately
+5. Handle edge cases: empty positions, zero balance, no agents connected
 
-- Run full integration test: start app, verify data, launch all 3 agents, watch them trade, verify portfolio updates
-- Hero section on dashboard: "Agent Trading Sandbox — Autonomous AI trading on Hyperliquid. Built for the humanless economy."
-- "How it works" = the TradingFlow animated diagram (built in HAC-15)
-- Error states, loading states everywhere
-- Create README.md with setup instructions
-- Final build check: `npm run build` must pass clean
+### 10. HAC-11: Demo Polish (Last)
+
+- Full integration test: launch 3 agents, watch them trade, verify leaderboard updates
+- Verify Connect page works: follow the setup instructions yourself, connect a 4th agent
+- Hero section on dashboard explaining the sandbox concept
+- README.md with setup instructions
+- Final `npm run build` must pass clean
 
 ## Environment Variables
 
@@ -247,7 +348,7 @@ DEMO_MODE=true  # Fast intervals (10s) + mock fallback if APIs fail
 
 ## Deployment — IMPORTANT
 
-The app is live at **http://95.111.230.249**. After every meaningful change, you MUST deploy:
+The app is live at **https://justlevelup.fun**. After every meaningful change, you MUST deploy:
 
 ### Deploy workflow
 1. **Commit** your changes with a descriptive message
@@ -289,8 +390,10 @@ Do not batch deployments. Each completed issue should be committed, pushed, and 
 
 ## Important Notes
 
-- This is **testnet only** — no real money. Don't worry about being too conservative with trades, the point is to demo it working.
+- **Paper trading only** — all trades are virtual against real prices. No real money, no on-chain execution for sandbox agents.
+- **One PaperTradingEngine instance** — shared singleton. Built-in lobster agents and external MCP agents all trade in the same sandbox, same leaderboard.
+- **HyperliquidClient is READ-ONLY** — only used to fetch real market prices from mainnet. Never execute real trades.
 - The judges will see this on a big screen — make it look good.
 - Prioritize working features over perfect code. Ship it.
 - If something breaks, fix it and move on. Don't refactor working code.
-- Commit after completing each issue.
+- Commit and deploy after completing each issue.
