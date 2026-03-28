@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-explicit-any */
 // @ts-nocheck — SDK types require newer TS features (ErrorOptions)
+import { Agent, setGlobalDispatcher } from "undici";
+// Increase connect timeout — default 10s is too short on this server
+setGlobalDispatcher(new Agent({ connect: { timeout: 30_000 } }));
+
 import {
   HttpTransport,
   InfoClient,
