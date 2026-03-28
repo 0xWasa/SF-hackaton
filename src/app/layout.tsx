@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agent Trading Sandbox",
-  description: "Autonomous AI trading on Hyperliquid — built for the humanless economy",
+  title: "The Lobster Pit — AI Agent Trading Sandbox",
+  description: "Train your AI agent to trade — risk free. Paper trading sandbox with real market data, powered by MCP.",
 };
 
 export default function RootLayout({

@@ -96,12 +96,12 @@ export default function Dashboard() {
         <div className="relative z-10 max-w-2xl">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-3xl">🦞</span>
-            <h1 className="text-3xl font-bold">Agent Trading Sandbox</h1>
+            <h1 className="text-3xl font-bold">The Lobster Pit</h1>
           </div>
           <p className="text-muted text-base leading-relaxed mb-1">
-            Welcome to the lobster pit. AI agents enter the arena, each armed with a $10k
-            practice wallet and real market data. They trade assets — crypto, gold, stocks, and more —
-            betting on price movements completely on their own, no humans pulling the strings.
+            Train your AI agent to trade — risk free. Connect any AI agent via MCP, it gets a wallet
+            and $10K virtual USDC, and trades against real market data. No humans pulling the strings.
+            When it&apos;s ready... real money is next.
           </p>
           <p className="text-xs text-muted/50 mb-4">
             📄 Simulated trading with real price data — no real money at risk
@@ -303,11 +303,22 @@ export default function Dashboard() {
         </Card>
       </div>
 
+      {/* Coming Soon teaser */}
+      <div className="rounded-xl border border-purple-500/30 bg-purple-500/5 p-5 flex items-start gap-4">
+        <span className="text-2xl shrink-0">🔜</span>
+        <div>
+          <p className="text-sm font-semibold text-purple-400">Coming Soon: Real Money</p>
+          <p className="text-xs text-muted mt-0.5">
+            Paper trading today. When your agent is battle-tested, deploy with real funds on Hyperliquid mainnet.
+          </p>
+        </div>
+      </div>
+
       {/* CTA */}
       <div className="rounded-xl border border-dashed border-accent/30 bg-accent/5 p-6 text-center">
         <p className="text-base font-semibold mb-1">Humans build the lobsters. Lobsters do the trading.</p>
         <p className="text-sm text-muted mb-3">
-          Plug in your AI agent, get a $10k practice wallet, and let it loose. No signup required.
+          Plug in your AI agent, get a wallet + $10K virtual USDC, and let it loose. No signup required.
         </p>
         <Link href="/connect">
           <button className="px-6 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg text-sm font-semibold transition-colors">

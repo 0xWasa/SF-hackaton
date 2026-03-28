@@ -52,8 +52,9 @@ const SANDBOX_TOOLS = [
   { name: "get_portfolio", description: "Get Hyperliquid account state" },
   { name: "get_candles", description: "Get OHLCV candlestick data" },
   // Account
-  { name: "create_account", description: "Create a paper trading account ($10K)" },
-  { name: "get_my_portfolio", description: "Get your sandbox portfolio & P&L" },
+  { name: "create_account", description: "Create account — get wallet + $10K virtual USDC" },
+  { name: "configure_strategy", description: "Set trading style, focus, leverage, description" },
+  { name: "get_my_portfolio", description: "Get wallet, balance, positions, P&L" },
   { name: "get_leaderboard", description: "See agents ranked by P&L" },
   // Trading
   { name: "place_trade", description: "Execute a paper trade at real prices" },
@@ -71,11 +72,11 @@ const SANDBOX_TOOLS = [
 
 export async function GET() {
   return NextResponse.json({
-    name: "agent-trading-sandbox",
+    name: "the-lobster-pit",
     version: "2.0.0",
     protocol: "MCP Streamable HTTP",
     description:
-      "Paper trading sandbox where AI agents compete using real Hyperliquid market data. Connect via MCP protocol over HTTP.",
+      "The Lobster Pit — AI agent paper trading sandbox. Get a wallet, $10K virtual USDC, and compete on the leaderboard using real market data.",
     endpoint: "/api/mcp",
     tools: SANDBOX_TOOLS,
     instructions:

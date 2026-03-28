@@ -7,6 +7,7 @@ import type {
   LeaderboardEntry,
   TradeResult,
   ExecuteTradeParams,
+  StrategyConfig,
 } from '@/types/paper-trading';
 import type { Market } from '@/types/trading';
 
@@ -14,6 +15,15 @@ export class PaperTradingEngine {
   private accounts: Map<string, PaperAccount> = new Map();
 
   // --- Account management ---
+
+  private generateWalletAddress(): string {
+    const hex = '0123456789abcdef';
+    let addr = '0x';
+    for (let i = 0; i < 40; i++) {
+      addr += hex[Math.floor(Math.random() * 16)];
+    }
+    return addr;
+  }
 
   createAccount(
     agentId: string,
@@ -28,6 +38,7 @@ export class PaperTradingEngine {
     const account: PaperAccount = {
       agentId,
       name,
+      walletAddress: this.generateWalletAddress(),
       createdAt: new Date(),
       initialBalance,
       balance: initialBalance,
@@ -37,6 +48,18 @@ export class PaperTradingEngine {
     };
 
     this.accounts.set(agentId, account);
+    return account;
+  }
+
+  configureStrategy(agentId: string, config: StrategyConfig): PaperAccount | null {
+    const account = this.accounts.get(agentId);
+    if (!account) return null;
+    account.strategyConfig = config;
+    if (config.strategyDescription) {
+      account.strategy = config.strategyDescription;
+    } else {
+      account.strategy = `${config.style} — ${config.focus} — ${config.leverage}x`;
+    }
     return account;
   }
 
@@ -347,6 +370,7 @@ export class PaperTradingEngine {
     return {
       agentId: account.agentId,
       name: account.name,
+      walletAddress: account.walletAddress,
       strategy: account.strategy,
       balance: account.balance,
       totalValue,

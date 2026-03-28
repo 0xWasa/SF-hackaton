@@ -1,13 +1,22 @@
 export interface PaperAccount {
   agentId: string;
   name: string;
+  walletAddress: string;
   createdAt: Date;
   initialBalance: number;
   balance: number;
   positions: PaperPosition[];
   tradeHistory: PaperTrade[];
   strategy?: string;
+  strategyConfig?: StrategyConfig;
   copyingFrom?: string;
+}
+
+export interface StrategyConfig {
+  focus: 'crypto' | 'all_assets';
+  style: 'conservative' | 'momentum' | 'degen' | 'arbitrage' | 'custom';
+  leverage: number;
+  strategyDescription?: string;
 }
 
 export interface PaperPosition {
@@ -35,6 +44,7 @@ export interface PaperTrade {
 export interface PaperPortfolio {
   agentId: string;
   name: string;
+  walletAddress: string;
   strategy?: string;
   balance: number;
   totalValue: number;

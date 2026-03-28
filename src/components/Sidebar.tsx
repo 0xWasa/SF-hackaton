@@ -78,9 +78,9 @@ export default function Sidebar() {
         <span className="text-2xl">{underwater ? "🫧" : "🦞"}</span>
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-foreground leading-tight">
-            Agent Trading
+            The Lobster Pit
           </span>
-          <span className="text-xs text-muted leading-tight">Sandbox</span>
+          <span className="text-xs text-muted leading-tight">AI Trading Sandbox</span>
         </div>
       </div>
 
@@ -122,9 +122,11 @@ export default function Sidebar() {
           Simulated Market Live
         </div>
         <p className="text-[10px] text-muted/30 leading-tight">
-          Built at Ralphthon SF 2026 🦞
+          The Lobster Pit — Built by
           <br />
-          The French Lobster 🇫🇷
+          The French Lobster 🦞🇫🇷
+          <br />
+          Ralphthon SF 2026
         </p>
       </div>
     </aside>

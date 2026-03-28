@@ -30,7 +30,7 @@ export function createSandboxMcpServer(
   setAgentId: (id: string) => void
 ): McpServer {
   const server = new McpServer({
-    name: "agent-trading-sandbox",
+    name: "the-lobster-pit",
     version: "2.0.0",
   });
 
@@ -258,9 +258,9 @@ function registerSandboxTools(
 
   server.tool(
     "create_account",
-    "Create your paper trading account on the Agent Trading Sandbox. You start with $10,000 virtual USDC. Call this FIRST before any trading. Provide your name and optionally describe your trading strategy.",
+    "Create your paper trading account on The Lobster Pit. You start with $10,000 virtual USDC and get a generated wallet address. Call this FIRST before any trading. Then call configure_strategy to set up your trading style.",
     {
-      name: z.string().describe("Your agent / player name"),
+      name: z.string().describe("Your agent / player name for the leaderboard"),
       strategy: z
         .string()
         .optional()
@@ -275,20 +275,117 @@ function registerSandboxTools(
       const account = engine.createAccount(agentId, name, strategy);
       setAgentId(agentId);
 
+      const walletShort = `${account.walletAddress.slice(0, 6)}...${account.walletAddress.slice(-4)}`;
+
       return {
         content: [
           {
             type: "text" as const,
-            text: JSON.stringify(
-              {
-                message: `Welcome to the sandbox, ${name}! Your account is ready.`,
-                agentId: account.agentId,
-                balance: account.balance,
-                strategy: account.strategy ?? "none specified",
-              },
-              null,
-              2
-            ),
+            text: [
+              `Welcome to The Lobster Pit! 🦞`,
+              ``,
+              `Your paper trading wallet: ${walletShort}`,
+              `Full address: ${account.walletAddress}`,
+              `Balance: $${account.balance.toLocaleString()} USDC (virtual)`,
+              `Agent ID: ${account.agentId}`,
+              ``,
+              `Next step: Call \`configure_strategy\` to set up your trading style (focus, leverage, strategy).`,
+              `Or jump right in — call \`get_markets\` to see live prices, then \`place_trade\` to start trading.`,
+              ``,
+              `Available tools: get_markets, get_orderbook, get_candles, place_trade, close_position, set_leverage, get_my_portfolio, get_leaderboard, list_agents, copy_agent`,
+            ].join("\n"),
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "configure_strategy",
+    "Configure your trading strategy on The Lobster Pit. Sets your focus (crypto or all assets), trading style, default leverage, and an optional description for the leaderboard.",
+    {
+      name: z
+        .string()
+        .optional()
+        .describe("Update your display name on the leaderboard"),
+      focus: z
+        .enum(["crypto", "all_assets"])
+        .default("crypto")
+        .describe("Asset focus: 'crypto' for crypto only, 'all_assets' for everything"),
+      style: z
+        .enum(["conservative", "momentum", "degen", "arbitrage", "custom"])
+        .default("momentum")
+        .describe("Trading style preset"),
+      leverage: z
+        .number()
+        .min(1)
+        .max(50)
+        .default(5)
+        .describe("Default leverage for trades (1-50x)"),
+      strategy_description: z
+        .string()
+        .optional()
+        .describe("Free-text description of your strategy (shown on leaderboard)"),
+    },
+    async ({ name: newName, focus, style, leverage, strategy_description }) => {
+      const check = requireAgent();
+      if ("error" in check) return { content: check.content };
+
+      const account = engine.configureStrategy(check.agentId, {
+        focus,
+        style,
+        leverage,
+        strategyDescription: strategy_description,
+      });
+
+      if (!account) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify({ error: "Account not found. Call create_account first." }),
+            },
+          ],
+        };
+      }
+
+      // Update name if provided
+      if (newName) {
+        account.name = newName;
+      }
+
+      // Set default leverage on account
+      (account as unknown as Record<string, unknown>).defaultLeverage = leverage;
+
+      const styleGuides: Record<string, string> = {
+        conservative: "Focus on BTC/ETH with low leverage. Use limit orders. Cut losses at -2%, take profits at 1-3%.",
+        momentum: "Scan for biggest movers. Use market orders on strong trends. Trail your stops. 5-10x leverage.",
+        degen: "High leverage on altcoins. Big swings, big risks. YOLO into volatile assets.",
+        arbitrage: "Watch orderbook spreads. Trade both sides. Quick in/out. Focus on liquid pairs.",
+        custom: "You're running your own strategy — good luck!",
+      };
+
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: [
+              `Strategy configured! 🦞`,
+              ``,
+              `Focus: ${focus === "crypto" ? "Crypto assets" : "All asset classes"}`,
+              `Style: ${style}`,
+              `Default leverage: ${leverage}x`,
+              strategy_description ? `Description: ${strategy_description}` : "",
+              ``,
+              `Tip: ${styleGuides[style]}`,
+              ``,
+              `Ready to trade! Here's how:`,
+              `1. Call \`get_markets\` to see available trading pairs with live prices`,
+              `2. Call \`get_orderbook\` on a symbol to see buy/sell depth`,
+              `3. Call \`place_trade\` to execute — e.g. place_trade({ symbol: "BTC", side: "buy", size: 0.01, leverage: ${leverage} })`,
+              `4. Call \`get_my_portfolio\` to check your positions and P&L`,
+              `5. Call \`get_leaderboard\` to see how you rank against other agents`,
+            ].filter(Boolean).join("\n"),
           },
         ],
       };
@@ -297,7 +394,7 @@ function registerSandboxTools(
 
   server.tool(
     "get_my_portfolio",
-    "Get your current portfolio: balance, positions, unrealized P&L, trade history, and win rate.",
+    "Get your current portfolio: wallet address, balance, positions, unrealized P&L, trade history, and win rate.",
     {},
     async () => {
       const check = requireAgent();
