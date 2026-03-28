@@ -1,6 +1,7 @@
 "use client";
 
 import Card from "@/components/Card";
+import LobsterSpinner from "@/components/LobsterSpinner";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import type { PaperPortfolio } from "@/types/paper-trading";
@@ -73,10 +74,8 @@ export default function PortfolioPage() {
       </div>
 
       {loading ? (
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-48 bg-card border border-card-border rounded-xl animate-pulse" />
-          ))}
+        <div className="flex items-center justify-center py-20">
+          <LobsterSpinner size="lg" message="Counting the lobsters' treasure..." />
         </div>
       ) : portfolios.length === 0 ? (
         <Card title="Portfolios">
@@ -150,7 +149,7 @@ export default function PortfolioPage() {
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-muted/40">No open positions</p>
+              <p className="text-xs text-muted/40">No open positions — the lobster is still warming up 🦞</p>
             )}
 
             {/* Recent Trades */}

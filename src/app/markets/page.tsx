@@ -1,6 +1,7 @@
 "use client";
 
 import Card from "@/components/Card";
+import LobsterSpinner from "@/components/LobsterSpinner";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -179,14 +180,15 @@ export default function MarketsPage() {
 
       <Card title={`${CATEGORY_LABELS[category]} Markets (${filtered.length})`} subtitle="Live prices — auto-refreshes every 5s">
         {loading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-10 bg-white/[0.02] rounded animate-pulse" />
-            ))}
+          <div className="flex items-center justify-center py-16">
+            <LobsterSpinner size="lg" message="Fetching live prices from Hyperliquid..." />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12 text-muted/40 text-sm">
-            {search ? `No markets matching "${search}"` : "No markets in this category"}
+          <div className="text-center py-12 text-sm">
+            <span className="text-3xl block mb-2">🦞</span>
+            <p className="text-muted/40">
+              {search ? `No markets matching "${search}" — even the lobster can't find it` : "No markets in this category yet"}
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">

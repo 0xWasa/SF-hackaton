@@ -2,6 +2,7 @@
 
 import Card from "@/components/Card";
 import StatusBadge from "@/components/StatusBadge";
+import LobsterSpinner from "@/components/LobsterSpinner";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 
@@ -42,6 +43,18 @@ const lobsterDescriptions: Record<string, string> = {
   "conservative": "BTC/ETH only, 1-2x leverage, limit orders, waits for clear trends",
   "degen": "Altcoins, 5-10x leverage, market orders, chases momentum",
   "arbitrage": "Orderbook imbalances, both sides, captures spreads",
+};
+
+const lobsterActiveMessages: Record<string, string> = {
+  "conservative-lobster": "The conservative lobster is scanning BTC dips...",
+  "degen-lobster": "The degen lobster is hunting 5x altcoin moves...",
+  "arbitrage-lobster": "The arbitrage lobster is reading orderbook spreads...",
+};
+
+const lobsterIdleMessages: Record<string, string> = {
+  "conservative-lobster": "Patiently waiting for the right moment",
+  "degen-lobster": "Resting between YOLO trades",
+  "arbitrage-lobster": "Calibrating spread detection",
 };
 
 export default function AgentPage() {
@@ -161,7 +174,11 @@ export default function AgentPage() {
               disabled={launching}
               className="px-5 py-2.5 bg-accent hover:bg-accent/90 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
             >
-              {launching ? "Launching..." : "Launch All Lobsters"}
+              {launching ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="inline-block animate-lobster-spin">🦞</span> Launching...
+                </span>
+              ) : "Launch All Lobsters"}
             </button>
           ) : (
             <button
@@ -217,13 +234,18 @@ export default function AgentPage() {
                   <span className="text-xs text-muted">Steps: <span className="font-mono">{agent.totalSteps}</span></span>
                   {agent.isRunning ? (
                     <span className="inline-flex items-center gap-1.5 text-xs font-medium text-accent">
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                      Active
+                      <span className="inline-block animate-lobster-spin text-sm">🦞</span>
+                      Trading
                     </span>
                   ) : (
                     <span className="text-xs text-muted/50">Idle</span>
                   )}
                 </div>
+                <p className="text-[10px] text-muted/50 mt-1 italic">
+                  {agent.isRunning
+                    ? lobsterActiveMessages[agent.agentId] || "The lobster is trading..."
+                    : lobsterIdleMessages[agent.agentId] || "Waiting for launch"}
+                </p>
               </div>
             </Card>
           </Link>
@@ -247,10 +269,8 @@ export default function AgentPage() {
       {/* Activity log */}
       <Card title="Activity Feed" subtitle="Live stream of all agents' thinking and actions">
         {loading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-20 bg-white/[0.02] rounded animate-pulse" />
-            ))}
+          <div className="flex items-center justify-center py-20">
+            <LobsterSpinner size="lg" message="Loading the lobster brain..." />
           </div>
         ) : allLogs.length === 0 ? (
           <div className="flex items-center justify-center py-20 text-sm text-muted/40">

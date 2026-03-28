@@ -2,6 +2,7 @@
 
 import Card from "@/components/Card";
 import PnlChart from "@/components/PnlChart";
+import LobsterSpinner from "@/components/LobsterSpinner";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 
@@ -89,10 +90,8 @@ export default function LeaderboardPage() {
 
       {/* Agent cards */}
       {loading ? (
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-32 bg-card border border-card-border rounded-xl animate-pulse" />
-          ))}
+        <div className="flex items-center justify-center py-20">
+          <LobsterSpinner size="lg" message="Ranking the lobsters..." />
         </div>
       ) : agents.length === 0 ? (
         <div className="rounded-xl border border-card-border bg-card p-12 text-center">

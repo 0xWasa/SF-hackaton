@@ -119,12 +119,10 @@ export default function MarketDetailPage({ params }: { params: Promise<{ symbol:
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="h-8 w-48 bg-white/[0.02] rounded animate-pulse" />
-        <div className="h-64 bg-white/[0.02] rounded animate-pulse" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="h-48 bg-white/[0.02] rounded animate-pulse" />
-          <div className="h-48 bg-white/[0.02] rounded animate-pulse" />
+      <div className="flex items-center justify-center py-32">
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-5xl animate-lobster-spin inline-block">🦞</span>
+          <p className="text-xs text-muted/60 animate-pulse">Loading market data...</p>
         </div>
       </div>
     );

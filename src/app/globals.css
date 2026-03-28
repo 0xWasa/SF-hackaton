@@ -115,3 +115,16 @@ body {
   background-size: 200% 200%;
   animation: caustics 20s ease-in-out infinite;
 }
+
+/* Rotating lobster spinner */
+@keyframes lobster-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(15deg) scale(1.05); }
+  50% { transform: rotate(0deg) scale(1); }
+  75% { transform: rotate(-15deg) scale(1.05); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+.animate-lobster-spin {
+  animation: lobster-spin 1.2s ease-in-out infinite;
+}
