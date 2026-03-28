@@ -43,7 +43,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className={`flex flex-col w-56 shrink-0 border-r border-card-border bg-card/50 transition-colors duration-500 ${underwater ? "bg-blue-950/80" : ""}`}>
+    <aside className={`flex flex-col w-56 shrink-0 border-r border-card-border bg-card/50 transition-colors duration-500 relative z-10 ${underwater ? "bg-blue-950/80" : ""}`}>
       {underwater && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
           {bubbles.map((b, i) => (

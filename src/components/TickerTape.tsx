@@ -55,7 +55,8 @@ export default function TickerTape() {
   const doubled = [...items, ...items];
 
   return (
-    <div className="w-full overflow-hidden bg-black/40 border-b border-card-border/30 py-1.5">
+    <div className="w-full overflow-hidden bg-black/40 border-b border-card-border/30 py-1.5 relative">
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-950/[0.06] to-transparent" />
       <div className="ticker-scroll flex gap-8 whitespace-nowrap">
         {doubled.map((item, i) => (
           <span key={i} className="inline-flex items-center gap-1.5 text-xs font-mono shrink-0">

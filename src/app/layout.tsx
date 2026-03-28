@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import TickerTape from "@/components/TickerTape";
 import TradeFlash from "@/components/TradeFlash";
 import EasterEggs from "@/components/EasterEggs";
+import AmbientBubbles from "@/components/AmbientBubbles";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,8 +48,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="h-full flex bg-background text-foreground">
+        <AmbientBubbles />
         <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden relative z-10">
           <TickerTape />
           <main className="flex-1 overflow-y-auto">
             <div className="max-w-7xl mx-auto p-6">{children}</div>

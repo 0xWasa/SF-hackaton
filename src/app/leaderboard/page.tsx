@@ -106,7 +106,11 @@ export default function LeaderboardPage() {
               href={`/agent/${agent.agentId}`}
               className={`block rounded-xl border bg-card p-5 transition-colors hover:bg-white/[0.02] ${
                 agent.rank === 1
-                  ? "border-yellow-500/30 bg-gradient-to-r from-yellow-500/5 to-card"
+                  ? "border-yellow-500/30 bg-gradient-to-r from-yellow-500/5 to-card crown-glow"
+                  : agent.rank === 2
+                  ? "border-zinc-400/20"
+                  : agent.rank === 3
+                  ? "border-amber-700/20"
                   : "border-card-border"
               }`}
             >
@@ -139,7 +143,7 @@ export default function LeaderboardPage() {
                     </div>
                     <div>
                       <span className="text-muted/50 text-xs">Profit / Loss</span>
-                      <p className={`font-mono font-semibold ${agent.pnl >= 0 ? "text-profit" : "text-loss"}`}>
+                      <p className={`font-mono font-semibold ${agent.pnl >= 0 ? "text-profit profit-glow" : "text-loss loss-glow"}`}>
                         {agent.pnl >= 0 ? "+" : ""}${agent.pnl.toFixed(2)} ({agent.pnlPercent >= 0 ? "+" : ""}{agent.pnlPercent.toFixed(1)}%)
                       </p>
                     </div>

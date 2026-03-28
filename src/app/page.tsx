@@ -125,6 +125,7 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Hero */}
       <div className="relative overflow-hidden rounded-2xl border border-card-border bg-gradient-to-br from-card via-card to-accent/5 p-8">
+        <div className="absolute inset-0 caustics-overlay" />
         <div className="absolute top-4 right-6 text-8xl opacity-10 select-none">🦞</div>
         <div className="relative z-10 max-w-2xl">
           <div className="flex items-center gap-2 mb-3">
@@ -186,7 +187,8 @@ export default function Dashboard() {
 
       {/* Launch / Stop Button */}
       {runningCount === 0 && !launching ? (
-        <div className="rounded-xl border-2 border-dashed border-accent/40 bg-accent/5 p-8 text-center">
+        <div className="relative overflow-hidden rounded-xl border-2 border-dashed border-accent/40 bg-accent/5 p-8 text-center">
+          <div className="absolute inset-0 caustics-overlay" />
           <span className="text-5xl block mb-3">🦞</span>
           <h2 className="text-xl font-bold mb-2">Launch All Lobsters</h2>
           <p className="text-sm text-muted mb-4">
@@ -272,7 +274,7 @@ export default function Dashboard() {
                 <span className="text-xl">{lobsterEmojis[topAgent.agentId] || "🦞"}</span>
                 <p className="text-lg font-semibold">{topAgent.name}</p>
               </div>
-              <p className={`text-xs font-mono mt-1 ${topAgent.pnl >= 0 ? "text-profit" : "text-loss"}`}>
+              <p className={`text-xs font-mono mt-1 ${topAgent.pnl >= 0 ? "text-profit profit-glow" : "text-loss loss-glow"}`}>
                 {topAgent.pnl >= 0 ? "+" : ""}${topAgent.pnl.toFixed(2)}
               </p>
             </>
@@ -327,7 +329,7 @@ export default function Dashboard() {
                   <p className="text-xs text-muted">{agent.strategy}</p>
                 </div>
                 <div className="text-right">
-                  <p className={`text-sm font-mono font-semibold ${agent.pnl >= 0 ? "text-profit" : "text-loss"}`}>
+                  <p className={`text-sm font-mono font-semibold ${agent.pnl >= 0 ? "text-profit profit-glow" : "text-loss loss-glow"}`}>
                     {agent.pnl >= 0 ? "+" : ""}${agent.pnl.toFixed(2)}
                   </p>
                   <p className="text-xs text-muted">
