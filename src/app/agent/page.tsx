@@ -251,14 +251,29 @@ export default function AgentPage() {
         ) : allLogs.length === 0 ? (
           <div className="flex items-center justify-center py-20 text-sm text-muted/40">
             <div className="text-center max-w-sm">
-              <span className="text-6xl block mb-4">🦞</span>
-              <p className="text-base font-medium text-muted/60 mb-2">
-                The lobsters are napping
-              </p>
-              <p className="text-xs leading-relaxed">
-                Hit &quot;Launch All Lobsters&quot; to wake them up. They will scan the markets,
-                decide what to trade, and show you their reasoning step by step.
-              </p>
+              {runningCount > 0 ? (
+                <>
+                  <span className="text-6xl block mb-4 animate-bounce">🦞</span>
+                  <p className="text-base font-medium text-muted/60 mb-2">
+                    The lobsters are warming up...
+                  </p>
+                  <p className="text-xs leading-relaxed animate-pulse">
+                    Scanning live markets, analyzing trends, building conviction.
+                    First trade decisions appearing shortly.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <span className="text-6xl block mb-4">🦞</span>
+                  <p className="text-base font-medium text-muted/60 mb-2">
+                    The lobsters are napping
+                  </p>
+                  <p className="text-xs leading-relaxed">
+                    Hit &quot;Launch All Lobsters&quot; to wake them up. They will scan the markets,
+                    decide what to trade, and show you their reasoning step by step.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         ) : (

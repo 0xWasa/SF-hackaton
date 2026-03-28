@@ -64,7 +64,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 5000);
+    const interval = setInterval(fetchData, 3000);
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -162,7 +162,7 @@ export default function Dashboard() {
       </div>
 
       {/* Launch Button */}
-      {runningCount === 0 && (
+      {runningCount === 0 && !launching && (
         <div className="rounded-xl border-2 border-dashed border-accent/40 bg-accent/5 p-8 text-center">
           <span className="text-5xl block mb-3">🦞</span>
           <h2 className="text-xl font-bold mb-2">Launch All Lobsters</h2>
@@ -174,11 +174,43 @@ export default function Dashboard() {
             disabled={launching}
             className="px-8 py-3 bg-accent hover:bg-accent/90 disabled:opacity-50 text-white rounded-lg text-sm font-bold transition-colors"
           >
-            {launching ? "Launching..." : "Launch All Lobsters 🦞"}
+            Launch All Lobsters 🦞
           </button>
           {launchError && (
             <p className="text-xs text-loss mt-2">{launchError}</p>
           )}
+        </div>
+      )}
+
+      {/* Launching Animation — shown during the launch → first trade window */}
+      {(launching || (runningCount > 0 && recentLogs.length === 0)) && (
+        <div className="rounded-xl border-2 border-accent/30 bg-gradient-to-br from-accent/5 to-card p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-2xl animate-bounce">🦞</span>
+            <div>
+              <h2 className="text-lg font-bold">Lobsters entering the arena...</h2>
+              <p className="text-xs text-muted">Fetching live prices, analyzing markets — first trades incoming</p>
+            </div>
+          </div>
+          <div className="space-y-3">
+            {[
+              { emoji: "🦞", name: "The Conservative Lobster", status: "Scanning BTC & ETH trends..." },
+              { emoji: "🦀", name: "The Degen Lobster", status: "Looking for momentum plays..." },
+              { emoji: "🐙", name: "The Arbitrage Lobster", status: "Reading orderbook spreads..." },
+            ].map((lobster, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-white/[0.02] border border-card-border/30">
+                <span className="text-lg">{lobster.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">{lobster.name}</p>
+                  <p className="text-xs text-muted/60 animate-pulse">{lobster.status}</p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                  <span className="text-xs text-accent font-mono">initializing</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -270,8 +302,17 @@ export default function Dashboard() {
             )) : (
               <div className="flex items-center justify-center py-8 text-sm text-muted/40">
                 <div className="text-center">
-                  <span className="text-3xl block mb-2">🦞</span>
-                  <p>Launch lobsters to see the leaderboard</p>
+                  {runningCount > 0 ? (
+                    <>
+                      <span className="text-3xl block mb-2 animate-bounce">🦞</span>
+                      <p className="text-muted/60">Rankings loading after first trades...</p>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-3xl block mb-2">🦞</span>
+                      <p>Launch lobsters to see the leaderboard</p>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -311,8 +352,18 @@ export default function Dashboard() {
             }) : (
               <div className="flex items-center justify-center py-8 text-sm text-muted/40">
                 <div className="text-center">
-                  <span className="text-3xl block mb-2">💤</span>
-                  <p>No activity yet — launch lobsters to see the feed</p>
+                  {runningCount > 0 ? (
+                    <>
+                      <span className="text-3xl block mb-2 animate-bounce">🦞</span>
+                      <p className="text-muted/60">Lobsters are analyzing the markets...</p>
+                      <p className="text-xs mt-1 animate-pulse">First trade incoming</p>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-3xl block mb-2">💤</span>
+                      <p>No activity yet — launch lobsters to see the feed</p>
+                    </>
+                  )}
                 </div>
               </div>
             )}
