@@ -2,6 +2,7 @@
 
 import Card from "@/components/Card";
 import StatusBadge from "@/components/StatusBadge";
+import AgentBrain from "@/components/AgentBrain";
 import Link from "next/link";
 import { useEffect, useState, useCallback, use } from "react";
 
@@ -179,8 +180,23 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
         </Card>
       )}
 
+      {/* Live Agent Brain — typewriter effect for the latest step */}
+      {logs.length > 0 && (() => {
+        const latest = logs[logs.length - 1];
+        return (
+          <Card title="Live Brain" subtitle="Latest step — watching the lobster think in real-time">
+            <AgentBrain
+              observation={latest.observation}
+              reasoning={latest.reasoning}
+              actions={latest.actions}
+              animate={status.isRunning}
+            />
+          </Card>
+        );
+      })()}
+
       {/* Agent Brain - Full Reasoning Stream */}
-      <Card title="Agent Brain" subtitle="Full reasoning stream — every observation, thought, and action">
+      <Card title="Full Reasoning Log" subtitle="Every observation, thought, and action">
         {logs.length === 0 ? (
           <div className="flex items-center justify-center py-16 text-sm text-muted/40">
             <div className="text-center">

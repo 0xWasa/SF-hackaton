@@ -2,6 +2,7 @@
 
 import Card from "@/components/Card";
 import StatusBadge from "@/components/StatusBadge";
+import TradingFlow from "@/components/TradingFlow";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 
@@ -143,6 +144,11 @@ export default function Dashboard() {
             Orders land on a real trading platform — fully autonomous, no human intervention. Claws only.
           </p>
         </div>
+      </div>
+
+      {/* Architecture Flow */}
+      <div className="rounded-xl border border-card-border bg-card">
+        <TradingFlow isActive={runningCount > 0} />
       </div>
 
       {/* Launch Button */}
