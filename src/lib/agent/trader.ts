@@ -241,11 +241,12 @@ export class TradingAgent {
 
           if (fnName === 'place_trade') {
             try {
+              const leverage = Math.min(Math.max(args.leverage || 1, 1), 50);
               const result = await paper.executeTrade(this.config.agentId, {
                 symbol: args.symbol,
                 side: args.side,
-                size: args.size,
-                leverage: args.leverage || 1,
+                size: Math.max(0.001, args.size),
+                leverage,
                 type: args.type || 'market',
                 price: args.price,
               });

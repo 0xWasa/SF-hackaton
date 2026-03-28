@@ -133,7 +133,7 @@ export class PaperTradingEngine {
       return { success: false, error: 'Account not found' };
     }
 
-    const leverage = params.leverage ?? 1;
+    const leverage = Math.min(Math.max(params.leverage ?? 1, 1), 50); // Clamp 1-50x
     let sizeAdjustedNote: string | undefined;
 
     // Determine execution price
@@ -142,7 +142,11 @@ export class PaperTradingEngine {
       const midPrice = await this.fetchMidPrice(params.symbol);
 
       if (params.type === 'market') {
-        execPrice = midPrice;
+        // Apply a small spread (0.05%) for realistic execution
+        const spreadBps = 0.0005;
+        execPrice = params.side === 'buy'
+          ? midPrice * (1 + spreadBps)
+          : midPrice * (1 - spreadBps);
       } else {
         // Limit order validation
         if (!params.price) {
@@ -486,9 +490,10 @@ export class PaperTradingEngine {
         const source = this.accounts.get(sourceAgentId);
         if (!source) continue;
 
-        const sourceTotal = source.balance + source.initialBalance;
-        const copierTotal = account.balance + account.initialBalance;
-        const scale = sourceTotal > 0 ? copierTotal / sourceTotal : 1;
+        // Scale by current balance ratio (not double-counted with initialBalance)
+        const sourceBalance = source.balance;
+        const copierBalance = account.balance;
+        const scale = sourceBalance > 0 ? copierBalance / sourceBalance : 1;
 
         const copierParams: ExecuteTradeParams = {
           ...params,
