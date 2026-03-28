@@ -200,7 +200,7 @@ export default function AgentPage() {
 
       {/* Combined stats */}
       {(runningCount > 0 || totalTrades > 0) && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="rounded-lg border border-card-border/50 bg-card p-4 text-center">
             <p className="text-xs text-muted mb-1">Lobsters Active</p>
             <p className="text-2xl font-semibold font-tabular">{runningCount} / 3</p>

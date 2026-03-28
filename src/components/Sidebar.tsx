@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -20,6 +20,24 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [clickCount, setClickCount] = useState(0);
   const [underwater, setUnderwater] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   const bubbles = useMemo(
     () =>
@@ -42,8 +60,8 @@ export default function Sidebar() {
     }
   };
 
-  return (
-    <aside className={`flex flex-col w-56 shrink-0 border-r border-card-border bg-card/50 transition-colors duration-500 relative z-10 ${underwater ? "bg-blue-950/80" : ""}`}>
+  const sidebarContent = (
+    <>
       {underwater && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
           {bubbles.map((b, i) => (
@@ -129,7 +147,86 @@ export default function Sidebar() {
           Ralphthon SF 2026
         </p>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-card/95 backdrop-blur-sm border-b border-card-border">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">🦞</span>
+          <span className="text-sm font-semibold text-foreground">The Lobster Pit</span>
+        </div>
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="p-2 rounded-lg hover:bg-white/5 text-muted"
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile drawer */}
+      <aside
+        className={`md:hidden fixed top-0 left-0 bottom-0 z-40 w-64 flex flex-col bg-card border-r border-card-border transition-transform duration-300 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        } ${underwater ? "bg-blue-950/80" : ""}`}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Desktop sidebar */}
+      <aside
+        className={`hidden md:flex flex-col w-56 shrink-0 border-r border-card-border bg-card/50 transition-colors duration-500 relative z-10 ${
+          underwater ? "bg-blue-950/80" : ""
+        }`}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Bottom navigation for mobile (always visible) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around bg-card/95 backdrop-blur-sm border-t border-card-border px-2 py-1.5 safe-area-pb">
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const isActive = pathname === href;
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] font-medium transition-colors ${
+                isActive ? "text-accent" : "text-muted"
+              }`}
+            >
+              <Icon active={isActive} />
+              <span>{label}</span>
+            </Link>
+          );
+        })}
+        <Link
+          href="/connect"
+          className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] font-medium text-accent"
+        >
+          <span className="text-base">🔌</span>
+          <span>Connect</span>
+        </Link>
+      </nav>
+    </>
   );
 }
 

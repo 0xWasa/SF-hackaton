@@ -128,3 +128,8 @@ body {
 .animate-lobster-spin {
   animation: lobster-spin 1.2s ease-in-out infinite;
 }
+
+/* Safe area padding for mobile bottom nav (iPhone notch/home indicator) */
+.safe-area-pb {
+  padding-bottom: max(0.375rem, env(safe-area-inset-bottom));
+}

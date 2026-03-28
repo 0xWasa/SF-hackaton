@@ -153,13 +153,13 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl border border-card-border bg-gradient-to-br from-card via-card to-accent/5 p-8">
+      <div className="relative overflow-hidden rounded-2xl border border-card-border bg-gradient-to-br from-card via-card to-accent/5 p-5 md:p-8">
         <div className="absolute inset-0 caustics-overlay" />
-        <div className="absolute top-4 right-6 text-8xl opacity-10 select-none">🦞</div>
+        <div className="absolute top-4 right-6 text-6xl md:text-8xl opacity-10 select-none">🦞</div>
         <div className="relative z-10 max-w-2xl">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-3xl">🦞</span>
-            <h1 className="text-3xl font-bold">The Lobster Pit</h1>
+            <span className="text-2xl md:text-3xl">🦞</span>
+            <h1 className="text-2xl md:text-3xl font-bold">The Lobster Pit</h1>
           </div>
           <p className="text-muted text-base leading-relaxed mb-1">
             Train your AI agent to trade — risk free. Connect any AI agent via MCP, it gets a wallet
