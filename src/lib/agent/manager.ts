@@ -69,18 +69,24 @@ class AgentManager {
       },
     ];
 
-    for (const lobster of lobsters) {
+    // Stagger agent starts to avoid simultaneous OpenAI calls
+    const staggerMs = Math.floor(interval / lobsters.length); // e.g. 10s/3 ≈ 3.3s apart
+
+    lobsters.forEach((lobster, index) => {
       // Create paper trading account for each agent
       paper.createAccount(lobster.agentId, lobster.name, `${lobster.personality} strategy`, 10_000);
 
-      this.createAndStartAgent({
-        ...lobster,
-        openaiApiKey,
-        interval,
-      });
-    }
+      const delay = index * staggerMs;
+      setTimeout(() => {
+        this.createAndStartAgent({
+          ...lobster,
+          openaiApiKey,
+          interval,
+        });
+      }, delay);
+    });
 
-    console.log(`[AgentManager] Launched ${lobsters.length} lobsters (interval: ${interval}ms)`);
+    console.log(`[AgentManager] Launched ${lobsters.length} lobsters (interval: ${interval}ms, stagger: ${staggerMs}ms)`);
   }
 }
 

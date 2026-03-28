@@ -60,6 +60,7 @@ export class TradingAgent {
   private logs: AgentLog[] = [];
   private intervalId: ReturnType<typeof setInterval> | null = null;
   private running = false;
+  private stepping = false; // guard against overlapping steps
   private totalSteps = 0;
   private lastStep?: Date;
 
@@ -90,12 +91,18 @@ export class TradingAgent {
 
   async step(): Promise<void> {
     if (!this.running) return;
+    if (this.stepping) {
+      console.log(`[${this.config.name}] Skipping step — previous step still running`);
+      return;
+    }
+    this.stepping = true;
 
     const actions: AgentAction[] = [];
     let observation = '';
     let reasoning = '';
     let portfolioValue = 0;
 
+    try { // outer try/finally for stepping guard
     try {
       // --- OBSERVE ---
       const client = getHyperliquidClient();
@@ -265,6 +272,9 @@ export class TradingAgent {
     console.log(
       `[${this.config.name}] Step ${this.totalSteps}: ${actions.map((a) => `${a.type}(${a.result})`).join(', ')}`
     );
+    } finally {
+      this.stepping = false;
+    }
   }
 
   getLogs(): AgentLog[] {

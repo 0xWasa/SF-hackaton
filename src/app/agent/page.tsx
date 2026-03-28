@@ -49,11 +49,17 @@ export default function AgentPage() {
   const [allLogs, setAllLogs] = useState<AgentLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [launching, setLaunching] = useState(false);
+  const [stopping, setStopping] = useState(false);
+  const [combinedPnl, setCombinedPnl] = useState<number | null>(null);
+  const [totalTrades, setTotalTrades] = useState(0);
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch("/api/agent");
-      const data = await res.json();
+      const [agentRes, leaderboardRes] = await Promise.all([
+        fetch("/api/agent"),
+        fetch("/api/leaderboard"),
+      ]);
+      const data = await agentRes.json();
       const agentList: AgentStatus[] = data.agents || [];
       setAgents(agentList);
 
@@ -62,6 +68,15 @@ export default function AgentPage() {
         .flatMap((a) => (a.logs || []).map((l) => ({ ...l, agentId: a.agentId, agentName: a.name })))
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       setAllLogs(merged);
+
+      // Combined P&L from leaderboard
+      try {
+        const lb = await leaderboardRes.json();
+        const entries: { pnl: number; totalTrades: number }[] = lb.leaderboard || [];
+        setCombinedPnl(entries.reduce((sum, e) => sum + e.pnl, 0));
+        setTotalTrades(entries.reduce((sum, e) => sum + e.totalTrades, 0));
+      } catch { /* ignore */ }
+
       setLoading(false);
     } catch {
       setLoading(false);
@@ -87,6 +102,19 @@ export default function AgentPage() {
     setLaunching(false);
   };
 
+  const stopAll = async () => {
+    setStopping(true);
+    try {
+      await fetch("/api/agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "stop" }),
+      });
+      await fetchData();
+    } catch {}
+    setStopping(false);
+  };
+
   const runningCount = agents.filter((a) => a.isRunning).length;
 
   return (
@@ -104,7 +132,7 @@ export default function AgentPage() {
           ) : (
             <StatusBadge status="offline" label="No agents running" />
           )}
-          {runningCount === 0 && (
+          {runningCount === 0 ? (
             <button
               onClick={launchAll}
               disabled={launching}
@@ -112,9 +140,37 @@ export default function AgentPage() {
             >
               {launching ? "Launching..." : "Launch All Lobsters"}
             </button>
+          ) : (
+            <button
+              onClick={stopAll}
+              disabled={stopping}
+              className="px-5 py-2.5 bg-loss/80 hover:bg-loss disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+            >
+              {stopping ? "Stopping..." : "Stop All"}
+            </button>
           )}
         </div>
       </div>
+
+      {/* Combined stats */}
+      {(runningCount > 0 || totalTrades > 0) && (
+        <div className="grid grid-cols-3 gap-4">
+          <div className="rounded-lg border border-card-border/50 bg-card p-4 text-center">
+            <p className="text-xs text-muted mb-1">Lobsters Active</p>
+            <p className="text-2xl font-semibold font-tabular">{runningCount} / 3</p>
+          </div>
+          <div className="rounded-lg border border-card-border/50 bg-card p-4 text-center">
+            <p className="text-xs text-muted mb-1">Combined P&L</p>
+            <p className={`text-2xl font-semibold font-tabular ${combinedPnl !== null && combinedPnl >= 0 ? "text-profit" : "text-loss"}`}>
+              {combinedPnl !== null ? `${combinedPnl >= 0 ? "+" : ""}$${combinedPnl.toFixed(2)}` : "—"}
+            </p>
+          </div>
+          <div className="rounded-lg border border-card-border/50 bg-card p-4 text-center">
+            <p className="text-xs text-muted mb-1">Total Trades</p>
+            <p className="text-2xl font-semibold font-tabular">{totalTrades}</p>
+          </div>
+        </div>
+      )}
 
       {/* Agent cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

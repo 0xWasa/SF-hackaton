@@ -13,6 +13,21 @@ import type { Market } from '@/types/trading';
 
 export class PaperTradingEngine {
   private accounts: Map<string, PaperAccount> = new Map();
+  private locks: Map<string, Promise<void>> = new Map();
+
+  /** Simple per-account mutex: serializes async operations on the same account */
+  private async withAccountLock<T>(agentId: string, fn: () => Promise<T>): Promise<T> {
+    const prev = this.locks.get(agentId) ?? Promise.resolve();
+    let release: () => void;
+    const next = new Promise<void>((resolve) => { release = resolve; });
+    this.locks.set(agentId, next);
+    await prev;
+    try {
+      return await fn();
+    } finally {
+      release!();
+    }
+  }
 
   // --- Account management ---
 
@@ -87,6 +102,13 @@ export class PaperTradingEngine {
   // --- Core trading ---
 
   async executeTrade(
+    agentId: string,
+    params: ExecuteTradeParams
+  ): Promise<TradeResult> {
+    return this.withAccountLock(agentId, () => this._executeTrade(agentId, params));
+  }
+
+  private async _executeTrade(
     agentId: string,
     params: ExecuteTradeParams
   ): Promise<TradeResult> {
@@ -253,6 +275,13 @@ export class PaperTradingEngine {
   }
 
   async closePosition(
+    agentId: string,
+    symbol: string
+  ): Promise<TradeResult> {
+    return this.withAccountLock(agentId, () => this._closePosition(agentId, symbol));
+  }
+
+  private async _closePosition(
     agentId: string,
     symbol: string
   ): Promise<TradeResult> {
