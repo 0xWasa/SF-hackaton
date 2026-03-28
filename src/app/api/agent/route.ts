@@ -11,11 +11,8 @@ export async function GET() {
       totalAgents: statuses.length,
       runningAgents: statuses.filter((s) => s.isRunning).length,
     });
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ agents: [], totalAgents: 0, runningAgents: 0 });
   }
 }
 
@@ -78,10 +75,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ error: 'Service temporarily unavailable. Try again.' }, { status: 200 });
   }
 }

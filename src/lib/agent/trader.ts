@@ -133,18 +133,28 @@ export class TradingAgent {
       // --- THINK ---
       const systemPrompt = getSystemPrompt(this.config.personality, account.balance, positionsSummary);
 
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          {
-            role: 'user',
-            content: `Here is the current market data:\n\n${marketSummary}\n\nYour current positions: ${positionsSummary}\nYour balance: $${account.balance.toFixed(2)}\n\nWhat do you want to do?`,
-          },
-        ],
-        tools: TOOLS,
-        tool_choice: 'auto',
-      });
+      const callOpenAI = () =>
+        this.openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            {
+              role: 'user',
+              content: `Here is the current market data:\n\n${marketSummary}\n\nYour current positions: ${positionsSummary}\nYour balance: $${account.balance.toFixed(2)}\n\nWhat do you want to do?`,
+            },
+          ],
+          tools: TOOLS,
+          tool_choice: 'auto',
+        });
+
+      let response;
+      try {
+        response = await callOpenAI();
+      } catch {
+        // Retry once after 2s
+        await new Promise((r) => setTimeout(r, 2000));
+        response = await callOpenAI();
+      }
 
       const message = response.choices[0]?.message;
       reasoning = message?.content || '(no reasoning provided)';

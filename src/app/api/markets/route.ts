@@ -1,18 +1,24 @@
 import { NextResponse } from 'next/server';
 import { getHyperliquidClient } from '@/lib/hyperliquid/client';
 
-// Mock fallback for demo resilience
-const MOCK_MARKETS = [
-  { symbol: 'BTC', price: 109432.50, volume24h: 0 },
-  { symbol: 'ETH', price: 2534.80, volume24h: 0 },
-  { symbol: 'SOL', price: 178.45, volume24h: 0 },
-  { symbol: 'DOGE', price: 0.1823, volume24h: 0 },
-  { symbol: 'ARB', price: 1.12, volume24h: 0 },
-  { symbol: 'AVAX', price: 38.90, volume24h: 0 },
-  { symbol: 'LINK', price: 16.45, volume24h: 0 },
-  { symbol: 'MATIC', price: 0.72, volume24h: 0 },
-];
+// Mock fallback with realistic prices + random micro-movements
+const MOCK_BASE_PRICES: Record<string, number> = {
+  BTC: 109432.50, ETH: 2534.80, SOL: 178.45, DOGE: 0.1823,
+  ARB: 1.12, AVAX: 38.90, LINK: 16.45, MATIC: 0.72,
+  XRP: 2.34, ADA: 0.68, DOT: 7.23, ATOM: 9.87,
+  OP: 2.15, SUI: 3.42, APT: 12.56, NEAR: 5.78,
+  FIL: 4.52, UNI: 11.34, AAVE: 234.56, INJ: 23.45,
+};
 
+function getMockMarkets() {
+  return Object.entries(MOCK_BASE_PRICES).map(([symbol, basePrice]) => {
+    // Random walk: -0.3% to +0.3% per tick
+    const jitter = 1 + (Math.random() - 0.5) * 0.006;
+    return { symbol, price: +(basePrice * jitter).toPrecision(6), volume24h: 0 };
+  });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let cachedMarkets: { data: any[]; timestamp: number } | null = null;
 
 export async function GET() {
@@ -20,7 +26,6 @@ export async function GET() {
     const client = getHyperliquidClient();
     const markets = await client.getMarkets();
 
-    // Filter to markets with prices, sort by price desc
     const filtered = markets
       .filter((m) => m.price > 0)
       .sort((a, b) => b.price - a.price);
@@ -28,11 +33,11 @@ export async function GET() {
     cachedMarkets = { data: filtered, timestamp: Date.now() };
 
     return NextResponse.json({ markets: filtered });
-  } catch (error) {
-    // Fallback: cached or mock
-    if (cachedMarkets && Date.now() - cachedMarkets.timestamp < 60_000) {
+  } catch {
+    // Fallback: cached (up to 2 minutes) or mock with jitter
+    if (cachedMarkets && Date.now() - cachedMarkets.timestamp < 120_000) {
       return NextResponse.json({ markets: cachedMarkets.data, cached: true });
     }
-    return NextResponse.json({ markets: MOCK_MARKETS, mock: true });
+    return NextResponse.json({ markets: getMockMarkets(), mock: true });
   }
 }
