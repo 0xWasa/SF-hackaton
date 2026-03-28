@@ -95,7 +95,13 @@ export async function POST(request: NextRequest) {
 
   // If there is an existing session, reuse its transport
   if (sessionId && sessions.has(sessionId)) {
-    const session = sessions.get(sessionId)!;
+    const session = sessions.get(sessionId);
+    if (!session) {
+      return new Response(
+        JSON.stringify({ error: "Session not found" }),
+        { status: 404, headers: { "Content-Type": "application/json" } }
+      );
+    }
     const response = await session.transport.handleRequest(request);
     return response;
   }
@@ -116,21 +122,29 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  const server = createSandboxMcpServer(
-    getClient(),
-    () => currentAgentId,
-    (id: string) => {
-      currentAgentId = id;
-      // Update session map with the new agentId
-      for (const [, session] of sessions) {
-        if (session.transport === transport) {
-          session.agentId = id;
+  let server;
+  try {
+    server = createSandboxMcpServer(
+      getClient(),
+      () => currentAgentId,
+      (id: string) => {
+        currentAgentId = id;
+        // Update session map with the new agentId
+        for (const [, session] of sessions) {
+          if (session.transport === transport) {
+            session.agentId = id;
+          }
         }
       }
-    }
-  );
+    );
 
-  await server.connect(transport);
+    await server.connect(transport);
+  } catch {
+    return new Response(
+      JSON.stringify({ error: "Failed to initialize MCP session" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
 
   const response = await transport.handleRequest(request);
   return response;
@@ -143,10 +157,18 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const sessionId = request.headers.get("mcp-session-id");
   if (sessionId && sessions.has(sessionId)) {
-    const session = sessions.get(sessionId)!;
-    const response = await session.transport.handleRequest(request);
-    sessions.delete(sessionId);
-    return response;
+    const session = sessions.get(sessionId);
+    if (!session) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
+    try {
+      const response = await session.transport.handleRequest(request);
+      sessions.delete(sessionId);
+      return response;
+    } catch {
+      sessions.delete(sessionId);
+      return NextResponse.json({ error: "Session cleanup failed" }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ error: "Session not found" }, { status: 404 });

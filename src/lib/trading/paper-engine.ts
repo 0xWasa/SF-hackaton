@@ -154,6 +154,14 @@ export class PaperTradingEngine {
       };
     }
 
+    // Validate execution price
+    if (!execPrice || execPrice <= 0) {
+      return {
+        success: false,
+        error: `Invalid execution price for ${params.symbol}: ${execPrice}. Market data may be unavailable.`,
+      };
+    }
+
     // Check for existing position in same symbol
     const existingPosition = account.positions.find(
       (p) => p.symbol.toUpperCase() === params.symbol.toUpperCase()

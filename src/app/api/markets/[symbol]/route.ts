@@ -7,6 +7,9 @@ export async function GET(
   { params }: { params: Promise<{ symbol: string }> }
 ) {
   const { symbol } = await params;
+  if (!symbol || typeof symbol !== 'string') {
+    return NextResponse.json({ error: 'Invalid symbol' }, { status: 400 });
+  }
   const sym = symbol.toUpperCase();
 
   try {

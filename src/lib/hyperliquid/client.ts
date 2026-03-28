@@ -214,6 +214,9 @@ export class HyperliquidClient {
     if (params.type === "market") {
       const mids = await this.mainnetInfo.allMids();
       const mid = parseFloat((mids as any)[params.symbol] || "0");
+      if (mid <= 0) {
+        throw new Error(`No valid price found for ${params.symbol}. Cannot execute market order.`);
+      }
       price = isBuy
         ? (mid * 1.01).toFixed(6)
         : (mid * 0.99).toFixed(6);

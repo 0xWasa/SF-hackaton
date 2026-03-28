@@ -8,8 +8,12 @@ export async function GET() {
 
     const portfolios = [];
     for (const account of accounts) {
-      const portfolio = await engine.getPortfolio(account.agentId);
-      if (portfolio) portfolios.push(portfolio);
+      try {
+        const portfolio = await engine.getPortfolio(account.agentId);
+        if (portfolio) portfolios.push(portfolio);
+      } catch {
+        // Skip failed portfolio fetch — don't crash the whole route
+      }
     }
 
     const totalValue = portfolios.reduce((s, p) => s + p.totalValue, 0);
