@@ -3,6 +3,7 @@
 import Card from "@/components/Card";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface MarketData {
   symbol: string;
@@ -69,6 +70,7 @@ function Sparkline({ history, current }: { history: number[]; current: number })
 }
 
 export default function MarketsPage() {
+  const router = useRouter();
   const [markets, setMarkets] = useState<MarketData[]>([]);
   const [loading, setLoading] = useState(true);
   const [prevPrices, setPrevPrices] = useState<Map<string, number>>(new Map());
@@ -211,6 +213,7 @@ export default function MarketsPage() {
                   return (
                     <tr
                       key={m.symbol}
+                      onClick={() => router.push(`/markets/${m.symbol}`)}
                       className="border-b border-card-border/50 last:border-0 hover:bg-white/[0.04] transition-colors cursor-pointer group"
                     >
                       <td className="py-3 text-muted/40 font-mono text-xs">{i + 1}</td>

@@ -7,6 +7,12 @@ import PnlChart from "@/components/PnlChart";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 
+interface MarketPrice {
+  symbol: string;
+  price: number;
+  change24h: number;
+}
+
 interface AgentLogEntry {
   timestamp: string;
   agentId?: string;
@@ -45,20 +51,30 @@ export default function Dashboard() {
   const [stopping, setStopping] = useState(false);
   const [launchError, setLaunchError] = useState<string | null>(null);
   const [recentLogs, setRecentLogs] = useState<AgentLogEntry[]>([]);
+  const [livePrices, setLivePrices] = useState<MarketPrice[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
-      const [agentRaw, leaderboardRaw, portfolioRaw] = await Promise.all([
+      const [agentRaw, leaderboardRaw, portfolioRaw, marketsRaw] = await Promise.all([
         fetch("/api/agent"),
         fetch("/api/leaderboard"),
         fetch("/api/portfolio"),
+        fetch("/api/markets"),
       ]);
       const agentRes = agentRaw.ok ? await agentRaw.json() : { agents: [] };
       const leaderboardRes = leaderboardRaw.ok ? await leaderboardRaw.json() : { leaderboard: [] };
       const portfolioRes = portfolioRaw.ok ? await portfolioRaw.json() : { summary: { totalAgents: 0, totalValue: 0, totalPnl: 0, totalTrades: 0 } };
+      const marketsRes = marketsRaw.ok ? await marketsRaw.json() : { markets: [] };
       setAgents(agentRes.agents || []);
       setLeaderboard(leaderboardRes.leaderboard || []);
       setSummary(portfolioRes.summary || { totalAgents: 0, totalValue: 0, totalPnl: 0, totalTrades: 0 });
+
+      // Top 6 markets for live prices display
+      const topMarkets = (marketsRes.markets || [])
+        .filter((m: MarketPrice) => m.price > 0)
+        .slice(0, 6)
+        .map((m: MarketPrice) => ({ symbol: m.symbol, price: m.price, change24h: m.change24h || 0 }));
+      setLivePrices(topMarkets);
 
       // Collect recent logs from all agents
       const allLogs = (agentRes.agents || [])
@@ -192,6 +208,31 @@ export default function Dashboard() {
           </p>
         </div>
       </div>
+
+      {/* Live Market Prices — always visible, makes dashboard feel alive */}
+      {livePrices.length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {livePrices.map((m) => (
+            <Link
+              key={m.symbol}
+              href={`/markets/${m.symbol}`}
+              className="rounded-lg border border-card-border/50 bg-card/50 px-3 py-2.5 hover:bg-white/[0.04] transition-colors"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-semibold text-foreground/70">{m.symbol}</span>
+                <span className={`text-[10px] font-mono ${m.change24h >= 0 ? "text-profit" : "text-loss"}`}>
+                  {m.change24h >= 0 ? "+" : ""}{m.change24h.toFixed(1)}%
+                </span>
+              </div>
+              <p className="text-sm font-mono font-semibold">
+                ${m.price >= 1
+                  ? m.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  : m.price.toFixed(4)}
+              </p>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Architecture Flow */}
       <div className="rounded-xl border border-card-border bg-card">
