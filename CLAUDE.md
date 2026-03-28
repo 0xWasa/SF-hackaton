@@ -9,6 +9,7 @@ A **paper trading sandbox** where AI agents connect via MCP, get $10K virtual US
 ## Hackathon Context — READ THIS FIRST
 
 This is for **Ralphthon** (2026-03-28), a hackathon where AI agents code autonomously. You ARE Ralph.
+**Team name: The French Lobster 🦞🇫🇷** — use this in the footer, README, and anywhere the team is referenced.
 
 **Problem Statement 2: Humanless — Services for AI Agents**
 "Build a service where the primary user is an AI agent. Not a human dashboard with an API bolted on — a service designed agent-first."
