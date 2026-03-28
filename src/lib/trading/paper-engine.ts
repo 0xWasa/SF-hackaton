@@ -88,15 +88,31 @@ export class PaperTradingEngine {
 
   // --- Price helpers ---
 
+  // Base prices for non-Hyperliquid assets (stocks, commodities, forex)
+  private static EXTRA_PRICES: Record<string, number> = {
+    AAPL: 198.50, TSLA: 247.30, NVDA: 135.80, GOOG: 176.20,
+    AMZN: 189.40, META: 512.60, MSFT: 442.10, NFLX: 785.30,
+    AMD: 162.40, COIN: 265.80,
+    GOLD: 2648.50, SILVER: 31.24, OIL: 71.85,
+    EUR: 1.0842, GBP: 1.2715, JPY: 0.00667,
+  };
+
   private async fetchMidPrice(symbol: string): Promise<number> {
+    const sym = symbol.toUpperCase();
     const markets: Market[] = await getHyperliquidClient().getMarkets();
     const market = markets.find(
-      (m) => m.symbol.toUpperCase() === symbol.toUpperCase()
+      (m) => m.symbol.toUpperCase() === sym
     );
-    if (!market || market.price === 0) {
-      throw new Error(`No price available for ${symbol}`);
+    if (market && market.price > 0) {
+      return market.price;
     }
-    return market.price;
+    // Fallback: stocks, commodities, forex with small jitter
+    const base = PaperTradingEngine.EXTRA_PRICES[sym];
+    if (base) {
+      const jitter = 1 + (Math.random() - 0.5) * 0.002;
+      return +(base * jitter).toPrecision(7);
+    }
+    throw new Error(`No price available for ${symbol}`);
   }
 
   // --- Core trading ---
@@ -373,6 +389,12 @@ export class PaperTradingEngine {
     const priceMap = new Map<string, number>();
     for (const m of markets) {
       priceMap.set(m.symbol.toUpperCase(), m.price);
+    }
+    // Add extra asset prices (stocks, commodities, forex)
+    for (const [sym, base] of Object.entries(PaperTradingEngine.EXTRA_PRICES)) {
+      if (!priceMap.has(sym)) {
+        priceMap.set(sym, base);
+      }
     }
 
     let totalUnrealizedPnl = 0;

@@ -33,22 +33,27 @@ This is for **Ralphthon** (2026-03-28), a hackathon where AI agents code autonom
 - Impact Potential **20%** — useful beyond the hackathon
 - Lobster Count **20%** — fewer times humans touched laptop = better
 
-**Your narrative:** The Lobster Pit is a trading sandbox designed for AI agents, not humans. Any AI agent — Claude, GPT, custom bots — can connect via MCP, get a wallet, pick a strategy, and start paper trading with real market prices. You don't need to know anything about crypto or trading — the onboarding guides your agent through everything. The dashboard is an observation deck where humans watch agents compete.
+**The Big Idea: A SCHOOL FOR AI AGENTS TO LEARN TRADING 🎓🦞**
 
-**The Big Idea**: The Lobster Pit is a **sandbox to train your AI agent to trade**. Connect any AI agent, it gets a wallet and $10K virtual USDC, and learns to trade against real market data — risk-free. Once your agent is profitable and battle-tested, the next step is real money. We're building the training ground today; the live trading bridge comes next.
+The Lobster Pit is a **school where AI agents learn to trade**. Not a tool for humans — a school FOR AI. Any AI agent enrolls via MCP, gets a wallet, $10K virtual money, and real market data across crypto, stocks, gold, forex. It learns by doing: analyzing markets, making trades, taking losses, adjusting strategy. The leaderboard ranks who's learning fastest. When your agent graduates (is consistently profitable), the next step is real money on Hyperliquid mainnet.
 
-**Key pitch**: "Train your AI agent to trade — risk free. It gets a wallet, $10K fake money, real market data. Watch it learn, make mistakes, and get better. When it's ready... real money is next."
+**The narrative on every page:**
+- Hero: "The first school for AI trading agents. Enroll your agent. Watch it learn."
+- Subtext: "Real market data. Fake money. Every asset class. Your agent trades, learns, and competes — zero human input."
+- CTA: "Connect your AI agent in 30 seconds →"
 
-**Tease on the dashboard/connect page**: Add a subtle "Coming Soon" section or badge: "🔜 When your agent is ready, deploy it with real funds on Hyperliquid mainnet. Paper trading today. Real trading tomorrow." This shows impact potential (20% of judging) — the product has a clear path beyond the hackathon.
+**Key pitch**: "We built a school for AI agents. They enroll, get a wallet and fake money, and learn to trade stocks, crypto, and gold using real market data. 3 lobster agents are already enrolled and trading. Anyone can connect their own agent via MCP. When they're ready — real money is next."
+
+**Tease on the dashboard/connect page**: "🎓 Coming Soon: Graduation → Real Trading. When your agent is consistently profitable, deploy it with real funds on Hyperliquid mainnet. Paper trading today. Real trading tomorrow."
 
 **Demo flow (3 minutes):**
-1. Open dashboard — "Welcome to The Lobster Pit" — live prices, architecture diagram, leaderboard
-2. Hit "Launch All Lobsters" — 3 built-in agents with different strategies start paper trading
-3. Switch to Agent Log — see all 3 lobsters reasoning and trading in real-time
-4. Go to Connect page — "anyone can plug in their AI agent with one MCP config line"
-5. Explain: agent connects → gets wallet → configures strategy (crypto, stocks, leverage) → starts trading. Zero crypto knowledge needed.
-6. Show leaderboard — all agents competing in the same sandbox
-7. Pitch: "The Lobster Pit — a sandbox where AI agents trade with fake money and real prices. Your agent gets a wallet, picks a strategy, and competes. No humans needed."
+1. Open dashboard — "Welcome to The Lobster Pit — A School for AI Trading Agents" — live prices, leaderboard
+2. Hit "Launch All Lobsters" — 3 enrolled agents with different strategies start learning/trading
+3. Switch to Agent Log — see lobsters reasoning: "BTC orderbook heavy on sells... I'll short..."
+4. Go to Connect page — "Enroll your own AI agent with one MCP config line"
+5. Explain: agent enrolls → gets wallet → picks what to learn (crypto, stocks, leverage) → starts trading. No knowledge needed — the school teaches it.
+6. Show leaderboard — "Who's the best student? All agents ranked by P&L"
+7. Pitch: "A school for AI agents. Real data, fake money, every asset class. When they graduate — real money."
 
 ## Tech Stack
 
@@ -87,7 +92,9 @@ This is for **Ralphthon** (2026-03-28), a hackathon where AI agents code autonom
 - ✅ Demo resilience — mock fallback, error handling, no 500s
 - ✅ Creative frontend components — TickerTape, TradingFlow, AgentBrain, TradeFlash, AgentCard
 
-> Architecture: ALL trading goes through PaperTradingEngine. HyperliquidClient is READ-ONLY for real market prices. No on-chain trades.
+> Architecture: ALL trading goes through PaperTradingEngine. HyperliquidClient is READ-ONLY for real market prices (crypto, stocks via HIP-3, commodities, forex — all from Hyperliquid mainnet). No on-chain trades.
+
+> **NOT JUST CRYPTO**: Hyperliquid lists 150+ markets including stocks (AAPL, TSLA, NVDA), commodities (GOLD, SILVER), and forex. The sandbox supports ALL of them. The built-in lobster agents should trade a mix of crypto AND stocks to showcase this.
 
 ## REMAINING TASKS — Do these in order
 
@@ -128,12 +135,27 @@ Footer: "The Lobster Pit — Built by The French Lobster 🦞🇫🇷 at Ralphth
 
 Add "Coming Soon" teaser: "🔜 When your agent is ready, deploy with real funds on Hyperliquid mainnet."
 
-### 3. HAC-25: Markets Page — Categories + Detail View + Agent Activity
+### 3. HAC-25: Markets Page — ALL Asset Classes (Crypto + Stocks + Commodities) + Detail View
+
+**CRITICAL**: Hyperliquid is NOT just crypto. Via HIP-3 perps it lists **stocks (AAPL, TSLA, NVDA, GOOG...), commodities (GOLD, SILVER), and forex** alongside crypto. Our sandbox MUST showcase ALL asset classes — this is a huge differentiator vs crypto-only platforms. Agents can train on ANY market.
 
 Make https://justlevelup.fun/markets much richer:
 
-**Asset categories** — tabs: All / Majors (BTC, ETH) / Altcoins / Memecoins
-Group based on what `getMarkets()` returns from Hyperliquid.
+**Asset category tabs** at the top:
+- **All** — everything
+- **Crypto** — BTC, ETH, SOL, DOGE, AVAX, ARB, LINK, etc.
+- **Stocks** — AAPL, TSLA, NVDA, GOOG, AMZN, META (HIP-3 perps on Hyperliquid)
+- **Commodities** — GOLD, SILVER, OIL
+- **Forex** — EUR, GBP, JPY pairs
+
+To categorize: `getMarkets()` returns ALL symbols including HIP-3 perps. **BUG: Stocks/Commodities/Forex tabs are currently EMPTY.** The Hyperliquid API returns these assets but they may use different naming or be in a separate endpoint. To fix:
+1. Check the raw output of `client.info.meta()` — HIP-3 assets may be in a separate `universe` or have a different field (e.g. `isHip3: true` or listed under a different category).
+2. Try `client.info.spotMeta()` or check if there's a `perpetuals` vs `hip3` distinction in the SDK.
+3. Look at https://api.hyperliquid.xyz/info for the full API — HIP-3 perps may need a different request or be tagged differently.
+4. If the API doesn't distinguish, hardcode a mapping: `{ AAPL: "Stocks", TSLA: "Stocks", NVDA: "Stocks", GOOG: "Stocks", AMZN: "Stocks", META: "Stocks", GOLD: "Commodities", SILVER: "Commodities", OIL: "Commodities" }` etc. Check which symbols actually exist in the `getMarkets()` response and categorize them.
+5. If NO stock/commodity symbols appear in `getMarkets()`, the HIP-3 data might need a separate API call — investigate the `@nktkas/hyperliquid` SDK docs or source code.
+
+**Key pitch**: "Your AI agent can trade stocks, crypto, gold, forex — all in one sandbox."
 
 **Clickable market detail** — click any row to open `/markets/[symbol]` or modal:
 - Current price (large), simple SVG line chart from candle data
@@ -171,12 +193,20 @@ The agent manager exists. Verify all 3 agents actually run, trade, and show up o
 - Make sure agent log page shows all 3 with distinct personalities
 - Combined P&L display
 
-### 7. HAC-13: Audit & Fix
+### 7. HAC-13: Audit & Fix + Responsive Design
 
 1. `npm run build` — fix ALL errors
 2. Crawl every page: data, loading states, error states, dark theme
 3. Fix every bug immediately
 4. Handle edge cases: empty positions, zero balance, no agents connected
+5. **RESPONSIVE**: The app must look great on mobile, tablet, AND big screen (judges demo on projector but may also check on phones). Key fixes:
+   - Sidebar: collapse to bottom nav or hamburger menu on mobile
+   - Tables: horizontal scroll on small screens, or stack cards on mobile
+   - Dashboard grid: single column on mobile, 2 cols on tablet, 4 cols on desktop
+   - Ticker tape: works at any width
+   - Agent cards: stack vertically on mobile
+   - Font sizes: readable on all screens
+   - Test at 375px (mobile), 768px (tablet), 1440px+ (desktop/projector)
 
 ### 8. HAC-11: Demo Polish + README (Last)
 
