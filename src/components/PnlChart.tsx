@@ -67,9 +67,13 @@ export default function PnlChart() {
   }, []);
 
   useEffect(() => {
-    fetchSnapshot();
+    let cancelled = false;
+    const run = async () => {
+      if (!cancelled) await fetchSnapshot();
+    };
+    run();
     const interval = setInterval(fetchSnapshot, 3000);
-    return () => clearInterval(interval);
+    return () => { cancelled = true; clearInterval(interval); };
   }, [fetchSnapshot]);
 
   if (history.length < 2 || agentIds.length === 0) {

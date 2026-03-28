@@ -30,9 +30,13 @@ export default function PortfolioPage() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    let cancelled = false;
+    const run = async () => {
+      if (!cancelled) await fetchData();
+    };
+    run();
     const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
+    return () => { cancelled = true; clearInterval(interval); };
   }, [fetchData]);
 
   const totalPositions = portfolios.reduce((s, p) => s + p.positions.length, 0);

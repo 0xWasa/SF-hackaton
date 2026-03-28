@@ -7,13 +7,22 @@ import PnlChart from "@/components/PnlChart";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 
+interface AgentLogEntry {
+  timestamp: string;
+  agentId?: string;
+  agentName?: string;
+  reasoning?: string;
+  actions?: { type: string; message?: string }[];
+  portfolioValue?: number;
+}
+
 interface AgentStatus {
   agentId: string;
   name: string;
   personality: string;
   isRunning: boolean;
   totalSteps: number;
-  logs: any[];
+  logs: AgentLogEntry[];
 }
 
 interface LeaderboardEntry {
@@ -35,7 +44,7 @@ export default function Dashboard() {
   const [launching, setLaunching] = useState(false);
   const [stopping, setStopping] = useState(false);
   const [launchError, setLaunchError] = useState<string | null>(null);
-  const [recentLogs, setRecentLogs] = useState<any[]>([]);
+  const [recentLogs, setRecentLogs] = useState<AgentLogEntry[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -54,9 +63,9 @@ export default function Dashboard() {
       // Collect recent logs from all agents
       const allLogs = (agentRes.agents || [])
         .flatMap((a: AgentStatus) =>
-          (a.logs || []).map((l: any) => ({ ...l, agentName: a.name }))
+          (a.logs || []).map((l: AgentLogEntry) => ({ ...l, agentName: a.name }))
         )
-        .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .sort((a: AgentLogEntry, b: AgentLogEntry) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
         .slice(0, 6);
       setRecentLogs(allLogs);
     } catch {
@@ -65,9 +74,13 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    let cancelled = false;
+    const run = async () => {
+      if (!cancelled) await fetchData();
+    };
+    run();
     const interval = setInterval(fetchData, 3000);
-    return () => clearInterval(interval);
+    return () => { cancelled = true; clearInterval(interval); };
   }, [fetchData]);
 
   const launchAll = async () => {
@@ -359,7 +372,7 @@ export default function Dashboard() {
 
         <Card title="Live Feed" subtitle="What the lobsters are doing right now">
           <div className="space-y-2">
-            {recentLogs.length > 0 ? recentLogs.map((log: any, i: number) => {
+            {recentLogs.length > 0 ? recentLogs.map((log, i) => {
               const action = log.actions?.[0];
               const isProfit = action?.type === 'close_position' || (action?.message && action.message.includes('+'));
               const isTrade = action?.type === 'place_trade';
@@ -375,7 +388,7 @@ export default function Dashboard() {
                     {time}
                   </span>
                   <div className="min-w-0">
-                    <span className="text-xs font-medium">{lobsterEmojis[log.agentId] || "🦞"} {log.agentName}</span>
+                    <span className="text-xs font-medium">{lobsterEmojis[log.agentId ?? ""] || "🦞"} {log.agentName}</span>
                     <p className={`text-xs mt-0.5 ${
                       isProfit ? "text-profit" :
                       isTrade ? "text-foreground/70" :

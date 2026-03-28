@@ -7,7 +7,7 @@ import { useEffect, useState, useCallback } from "react";
 
 interface AgentAction {
   type: string;
-  details: Record<string, any>;
+  details: Record<string, string | number | boolean | undefined>;
   result: string;
   message: string;
 }
@@ -87,9 +87,13 @@ export default function AgentPage() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    let cancelled = false;
+    const run = async () => {
+      if (!cancelled) await fetchData();
+    };
+    run();
     const interval = setInterval(fetchData, 3000);
-    return () => clearInterval(interval);
+    return () => { cancelled = true; clearInterval(interval); };
   }, [fetchData]);
 
   const launchAll = async () => {

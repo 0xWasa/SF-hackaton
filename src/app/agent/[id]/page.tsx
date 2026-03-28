@@ -8,7 +8,7 @@ import { useEffect, useState, useCallback, use } from "react";
 
 interface AgentAction {
   type: string;
-  details: Record<string, any>;
+  details: Record<string, string | number | boolean | undefined>;
   result: string;
   message: string;
 }
@@ -49,7 +49,15 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
   const { id } = use(params);
   const [status, setStatus] = useState<AgentStatus | null>(null);
   const [logs, setLogs] = useState<AgentLog[]>([]);
-  const [portfolio, setPortfolio] = useState<any>(null);
+  const [portfolio, setPortfolio] = useState<{
+    agentId: string;
+    balance: number;
+    totalValue: number;
+    totalPnl: number;
+    winRate: number;
+    totalTrades: number;
+    positions: { symbol: string; side: string; size: number; entryPrice: number; leverage: number; unrealizedPnl?: number }[];
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -65,7 +73,7 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
       if (agentRes.logs) setLogs(agentRes.logs);
 
       // Find this agent's portfolio
-      const p = (portfolioRes.portfolios || []).find((p: any) => p.agentId === id);
+      const p = (portfolioRes.portfolios || []).find((p: { agentId: string }) => p.agentId === id);
       if (p) setPortfolio(p);
 
       setLoading(false);
@@ -75,9 +83,13 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
   }, [id]);
 
   useEffect(() => {
-    fetchData();
+    let cancelled = false;
+    const run = async () => {
+      if (!cancelled) await fetchData();
+    };
+    run();
     const interval = setInterval(fetchData, 3000);
-    return () => clearInterval(interval);
+    return () => { cancelled = true; clearInterval(interval); };
   }, [fetchData]);
 
   if (loading) {
@@ -161,7 +173,7 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
       {portfolio && portfolio.positions.length > 0 && (
         <Card title="Open Positions">
           <div className="space-y-2">
-            {portfolio.positions.map((pos: any) => (
+            {portfolio.positions.map((pos) => (
               <div key={pos.symbol} className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-card-border/50">
                 <div className="flex items-center gap-3">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded ${pos.side === 'long' ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'}`}>

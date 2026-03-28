@@ -110,9 +110,13 @@ export default function MarketsPage() {
   }, []);
 
   useEffect(() => {
-    fetchMarkets();
+    let cancelled = false;
+    const run = async () => {
+      if (!cancelled) await fetchMarkets();
+    };
+    run();
     const interval = setInterval(fetchMarkets, 5000);
-    return () => clearInterval(interval);
+    return () => { cancelled = true; clearInterval(interval); };
   }, [fetchMarkets]);
 
   const filtered = useMemo(() => {

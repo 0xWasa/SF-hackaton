@@ -169,7 +169,7 @@ export class TradingAgent {
       // --- ACT ---
       if (message?.tool_calls && message.tool_calls.length > 0) {
         for (const toolCall of message.tool_calls) {
-          const fn = (toolCall as any).function;
+          const fn = (toolCall as { function?: { name: string; arguments: string } }).function;
           if (!fn) continue;
           const fnName = fn.name;
           const args = JSON.parse(fn.arguments);

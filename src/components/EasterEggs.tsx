@@ -62,8 +62,11 @@ export default function EasterEggs() {
     const seen = sessionStorage.getItem("confetti-shown");
     if (!seen) {
       sessionStorage.setItem("confetti-shown", "1");
-      setHasConfetti(true);
-      setTimeout(() => setHasConfetti(false), 3000);
+      const raf = requestAnimationFrame(() => {
+        setHasConfetti(true);
+        setTimeout(() => setHasConfetti(false), 3000);
+      });
+      return () => cancelAnimationFrame(raf);
     }
   }, []);
 

@@ -19,7 +19,7 @@ export interface AgentLog {
 
 export interface AgentAction {
   type: 'place_trade' | 'close_position' | 'hold';
-  details: Record<string, any>;
+  details: Record<string, string | number | boolean | undefined>;
   result: 'success' | 'error';
   message: string;
 }

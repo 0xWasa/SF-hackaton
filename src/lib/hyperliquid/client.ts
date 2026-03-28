@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-explicit-any */
 // @ts-nocheck — SDK types require newer TS features (ErrorOptions)
 import {
   HttpTransport,
