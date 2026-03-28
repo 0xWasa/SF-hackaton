@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -13,12 +14,53 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [clickCount, setClickCount] = useState(0);
+  const [underwater, setUnderwater] = useState(false);
+
+  const handleLogoClick = () => {
+    const next = clickCount + 1;
+    setClickCount(next);
+    if (next >= 5) {
+      setClickCount(0);
+      setUnderwater(true);
+      setTimeout(() => setUnderwater(false), 3000);
+    }
+  };
 
   return (
-    <aside className="flex flex-col w-56 shrink-0 border-r border-card-border bg-card/50">
+    <aside className={`flex flex-col w-56 shrink-0 border-r border-card-border bg-card/50 transition-colors duration-500 ${underwater ? "bg-blue-950/80" : ""}`}>
+      {underwater && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-blue-400/20 animate-bubble"
+              style={{
+                width: `${6 + Math.random() * 8}px`,
+                height: `${6 + Math.random() * 8}px`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${2 + Math.random() * 2}s`,
+              }}
+            />
+          ))}
+          <style jsx>{`
+            @keyframes bubble {
+              0% { bottom: -10px; opacity: 0.8; }
+              100% { bottom: 100%; opacity: 0; }
+            }
+            .animate-bubble {
+              animation: bubble 3s ease-out infinite;
+            }
+          `}</style>
+        </div>
+      )}
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-card-border">
-        <span className="text-2xl">🦞</span>
+      <div
+        className="flex items-center gap-2.5 px-5 py-5 border-b border-card-border cursor-pointer select-none"
+        onClick={handleLogoClick}
+      >
+        <span className="text-2xl">{underwater ? "🫧" : "🦞"}</span>
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-foreground leading-tight">
             Agent Trading
@@ -59,11 +101,16 @@ export default function Sidebar() {
       </div>
 
       {/* Status footer */}
-      <div className="p-4 border-t border-card-border">
+      <div className="p-4 border-t border-card-border space-y-2">
         <div className="flex items-center gap-2 text-xs text-muted">
           <span className="w-2 h-2 rounded-full bg-profit animate-pulse" />
           Simulated Market Live
         </div>
+        <p className="text-[10px] text-muted/30 leading-tight">
+          Built at Ralphthon SF 2026 🦞
+          <br />
+          The French Lobster 🇫🇷
+        </p>
       </div>
     </aside>
   );

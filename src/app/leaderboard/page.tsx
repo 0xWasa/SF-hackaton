@@ -119,8 +119,8 @@ export default function LeaderboardPage() {
                   <div className="flex items-center gap-3 mb-1">
                     <h3 className="text-lg font-semibold">{agent.name}</h3>
                     {agent.rank === 1 && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 font-medium">
-                        Top Lobster
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 font-medium animate-pulse">
+                        👑 Top Lobster
                       </span>
                     )}
                   </div>

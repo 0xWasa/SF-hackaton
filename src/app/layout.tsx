@@ -4,6 +4,7 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import TickerTape from "@/components/TickerTape";
 import TradeFlash from "@/components/TradeFlash";
+import EasterEggs from "@/components/EasterEggs";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({
           </main>
         </div>
         <TradeFlash />
+        <EasterEggs />
       </body>
     </html>
   );
