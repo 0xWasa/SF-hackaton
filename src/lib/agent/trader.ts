@@ -42,7 +42,7 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     type: 'function',
     function: {
       name: 'hold',
-      description: 'Do nothing this step — hold current positions',
+      description: 'Skip this step. ONLY use this if you already have 2+ open positions and see no good opportunities. Prefer trading over holding.',
       parameters: {
         type: 'object',
         properties: {
@@ -180,7 +180,7 @@ export class TradingAgent {
             },
           ],
           tools: TOOLS,
-          tool_choice: 'auto',
+          tool_choice: 'required',
         });
 
       let response;
