@@ -3,6 +3,7 @@
 import Card from "@/components/Card";
 import StatusBadge from "@/components/StatusBadge";
 import TradingFlow from "@/components/TradingFlow";
+import PnlChart from "@/components/PnlChart";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 
@@ -263,6 +264,9 @@ export default function Dashboard() {
           </p>
         </Card>
       </div>
+
+      {/* Live P&L Chart — shows when agents are running */}
+      {runningCount > 0 && <PnlChart />}
 
       {/* Mini Leaderboard + Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import Card from "@/components/Card";
+import PnlChart from "@/components/PnlChart";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 
@@ -78,6 +79,9 @@ export default function LeaderboardPage() {
           </p>
         </Card>
       </div>
+
+      {/* Live P&L Chart */}
+      {agents.length > 0 && <PnlChart />}
 
       {/* Agent cards */}
       {loading ? (
