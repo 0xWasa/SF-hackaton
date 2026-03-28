@@ -1,35 +1,49 @@
 #!/bin/bash
-# Ralph Loop — autonomous AI agent that runs Claude Code repeatedly
-# until all tasks are complete. Streams output live.
+# Ralph Loop — autonomous AI agent that runs Claude Code repeatedly.
+# Runs ALL iterations no matter what. Never stops early.
 #
 # Usage: ./scripts/ralph/ralph.sh [max_iterations]
 # Default: 20 iterations
 
-set -uo pipefail
-
 MAX_ITERATIONS=${1:-20}
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-TMPFILE=$(mktemp /tmp/ralph-output.XXXXXX)
+
+# Prevent Mac from sleeping while Ralph works
+caffeinate -dims -w $$ &
 
 cd "$PROJECT_DIR"
 
 RALPH_QUOTES=(
-    "Me fail English? That's unpossible!"
-    "I'm learnding!"
+    "Me fail English? Thats unpossible!"
+    "I am learnding!"
     "Hi, Super Nintendo Chalmers!"
     "I bent my Wookie..."
-    "My cat's breath smells like cat food."
+    "My cats breath smells like cat food."
     "I found a moon rock in my nose!"
-    "I'm Idaho!"
-    "That's where I saw the leprechaun. He told me to burn things."
+    "I am Idaho!"
     "When I grow up, I wanna be a principal or a caterpillar."
     "Go banana!"
-    "I'm a unitard!"
+    "I am a unitard!"
     "Even my boogers are sad."
     "I eated the purple berries..."
-    "The doctor said I wouldn't have so many nose bleeds if I kept my finger outta there."
 )
+
+PROMPT="Read CLAUDE.md carefully. Check git log to see what has been done already.
+
+RULES:
+1. Pick ONE task from CLAUDE.md that is not yet implemented or has bugs. Implement it fully.
+2. Run npm run build and fix any errors until it passes clean.
+3. Commit, push to git, and deploy to the server (follow deploy instructions in CLAUDE.md exactly).
+4. After deploying, do a quick audit: does the site load? Are there errors? Does the feature work?
+5. Do NOT output the word COMPLETE anywhere. You are NEVER done. There is always more to improve.
+6. Stop after finishing one task. You will be restarted automatically with fresh context.
+
+PRIORITY ORDER:
+- First: Fix bugs (HAC-24 trade sizing is urgent)
+- Then: New features (HAC-23 onboarding with wallet, HAC-25 markets page)
+- Then: Polish, easter eggs, design improvements
+- Always: If you see something broken, fix it immediately"
 
 echo ""
 echo "  ⠀⠀⠀⠀⠀⠀⣀⣀⡤⠤⠤⣤⣀⡀⠀⠀⠀⠀⠀⠀"
@@ -44,9 +58,10 @@ echo ""
 echo "  ╔══════════════════════════════════════════╗"
 echo "  ║  🦞 RALPH WIGGUM — AUTONOMOUS MODE 🦞   ║"
 echo "  ║  Team: The French Lobster 🇫🇷             ║"
-echo "  ║  \"I'm helping!\"                          ║"
 echo "  ╠══════════════════════════════════════════╣"
 echo "  ║  Max iterations: $MAX_ITERATIONS                        ║"
+echo "  ║  Will run ALL iterations automatically   ║"
+echo "  ║  Safe to walk away now                   ║"
 echo "  ╚══════════════════════════════════════════╝"
 echo ""
 
@@ -61,38 +76,18 @@ for i in $(seq 1 $MAX_ITERATIONS); do
     echo "  🦞━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🦞"
     echo ""
 
-    # Clear temp file
-    > "$TMPFILE"
-
-    # Run Claude Code with script to force PTY (enables live streaming on macOS)
-    PROMPT="Read CLAUDE.md for full context. Check git log and current code to understand what's already done. Work on the next incomplete task in order. Implement it fully, run 'npm run build' to verify, commit and deploy your work (push to git + deploy to server as described in CLAUDE.md). Output <promise>COMPLETE</promise> ONLY if ALL tasks in CLAUDE.md are finished. If there are still tasks remaining, just stop after committing and deploying."
-    script -q "$TMPFILE" bash -c "claude --dangerously-skip-permissions -p \"$PROMPT\" 2>&1"
-
-    # Check for completion signal
-    if grep -q "<promise>COMPLETE</promise>" "$TMPFILE"; then
-        echo ""
-        echo "  🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆"
-        echo "  ┃                                       ┃"
-        echo "  ┃   RALPH COMPLETED ALL TASKS! 🎉        ┃"
-        echo "  ┃   \"I'm a winner!\"                      ┃"
-        echo "  ┃   Iteration $i/$MAX_ITERATIONS — $(date '+%H:%M:%S')        ┃"
-        echo "  ┃   Team: The French Lobster 🦞🇫🇷         ┃"
-        echo "  ┃                                       ┃"
-        echo "  🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆🦞🏆"
-        rm -f "$TMPFILE"
-        exit 0
-    fi
+    # Run Claude Code. || true ensures the loop NEVER stops even if Claude crashes.
+    claude --dangerously-skip-permissions -p "$PROMPT" 2>&1 || true
 
     echo ""
-    echo "  🦞 Iteration $i done. Ralph is restarting with fresh brain..."
-    sleep 3
+    echo "  🦞 Iteration $i finished at $(date '+%H:%M:%S'). Next iteration in 5s..."
+    echo ""
+    sleep 5
 done
 
 echo ""
 echo "  ╔══════════════════════════════════════════╗"
-echo "  ║  🦞 Ralph hit max iterations ($MAX_ITERATIONS)        ║"
-echo "  ║  \"I tried and failed. The lesson is:     ║"
-echo "  ║   never try.\" — Homer Simpson            ║"
+echo "  ║  🦞 Ralph finished all $MAX_ITERATIONS iterations     ║"
+echo "  ║  Check git log and the live site.        ║"
 echo "  ╚══════════════════════════════════════════╝"
-rm -f "$TMPFILE"
-exit 1
+exit 0
