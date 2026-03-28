@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 interface TickerItem {
   symbol?: string;
   price?: number;
-  change?: number;
   agentName?: string;
   pnl?: number;
 }
@@ -23,13 +22,12 @@ export default function TickerTape() {
 
         const tickers: TickerItem[] = [];
 
-        // Add top 8 markets
+        // Add top 8 markets (no fake change data — prices are real)
         const markets = (marketsRes.markets || []).slice(0, 8);
         for (const m of markets) {
           tickers.push({
             symbol: m.symbol,
             price: m.price,
-            change: (Math.random() - 0.45) * 2, // slight positive bias
           });
         }
 
@@ -64,10 +62,6 @@ export default function TickerTape() {
                 <span className="text-foreground/70 font-semibold">{item.symbol}</span>
                 <span className="text-foreground/50">
                   ${item.price! >= 1 ? item.price!.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.price!.toFixed(4)}
-                </span>
-                <span className={item.change! >= 0 ? "text-profit" : "text-loss"}>
-                  {item.change! >= 0 ? "▲" : "▼"}
-                  {Math.abs(item.change!).toFixed(1)}%
                 </span>
               </>
             ) : (

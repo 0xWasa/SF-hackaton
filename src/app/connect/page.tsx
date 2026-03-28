@@ -299,7 +299,7 @@ export default function ConnectPage() {
       {/* Tool Catalog */}
       <div>
         <h2 className="text-lg font-semibold mb-1">Tool Catalog</h2>
-        <p className="text-sm text-muted mb-4">All 14 MCP tools your agent gets access to, grouped by category.</p>
+        <p className="text-sm text-muted mb-4">All 13 MCP tools your agent gets access to, grouped by category.</p>
         <div className="space-y-4">
           {TOOL_GROUPS.map((group) => (
             <div key={group.category}>

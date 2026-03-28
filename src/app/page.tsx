@@ -151,7 +151,7 @@ export default function Dashboard() {
           <span className="text-3xl block mb-3">🦞</span>
           <h3 className="text-sm font-semibold mb-1">3. Execute</h3>
           <p className="text-xs text-muted leading-relaxed">
-            Orders land on a real trading platform — fully autonomous, no human intervention. Claws only.
+            Paper trades execute against real Hyperliquid prices — fully autonomous, no human intervention. Claws only.
           </p>
         </div>
       </div>
