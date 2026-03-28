@@ -8,7 +8,7 @@ import { getPaperTradingEngine } from "@/lib/trading/paper-engine";
  */
 export function createTradingMcpServer(client: HyperliquidClient): McpServer {
   const server = new McpServer({
-    name: "hyperliquid-trading",
+    name: "the-lobster-pit",
     version: "1.0.0",
   });
 
@@ -34,8 +34,9 @@ export function createSandboxMcpServer(
     version: "2.0.0",
   });
 
-  // Keep all existing market-data tools
-  registerMarketDataTools(server, client);
+  // Register only the market-data tools useful for sandbox agents
+  // (excludes get_portfolio which shows raw Hyperliquid data — agents should use get_my_portfolio)
+  registerSandboxMarketDataTools(server, client);
 
   // Add sandbox-specific tools
   registerSandboxTools(server, getAgentId, setAgentId);
@@ -44,7 +45,82 @@ export function createSandboxMcpServer(
 }
 
 // ---------------------------------------------------------------------------
-// Market-data (read) tools
+// Market-data tools for sandbox (no get_portfolio — agents use get_my_portfolio)
+// ---------------------------------------------------------------------------
+
+function registerSandboxMarketDataTools(server: McpServer, client: HyperliquidClient) {
+  server.tool(
+    "get_markets",
+    "Get all available trading markets with current mid prices from Hyperliquid mainnet. Returns symbol, price, and 24h stats for 150+ pairs.",
+    {},
+    async () => {
+      const markets = await client.getMarkets();
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(markets, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "get_orderbook",
+    "Get the order book (top 10 bids and asks) for a specific trading pair. Useful for analyzing market depth and spread.",
+    {
+      symbol: z
+        .string()
+        .describe("Trading pair symbol, e.g. 'BTC', 'ETH', 'SOL'"),
+    },
+    async ({ symbol }) => {
+      const book = await client.getOrderbook(symbol);
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(book, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "get_candles",
+    "Get OHLCV candlestick data for a trading pair. Useful for technical analysis and trend detection.",
+    {
+      symbol: z.string().describe("Trading pair symbol, e.g. 'BTC', 'ETH'"),
+      interval: z
+        .enum(["1m", "5m", "15m", "1h", "4h", "1d"])
+        .default("1h")
+        .describe("Candle interval"),
+      limit: z
+        .number()
+        .default(50)
+        .describe("Number of candles to return (max 100)"),
+    },
+    async ({ symbol, interval, limit }) => {
+      const candles = await client.getCandles(
+        symbol,
+        interval as "1m" | "5m" | "15m" | "1h" | "4h" | "1d",
+        limit
+      );
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(candles, null, 2),
+          },
+        ],
+      };
+    }
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Market-data (read) tools — full set including get_portfolio (for stdio transport)
 // ---------------------------------------------------------------------------
 
 function registerMarketDataTools(server: McpServer, client: HyperliquidClient) {
@@ -292,7 +368,11 @@ function registerSandboxTools(
               `Next step: Call \`configure_strategy\` to set up your trading style (focus, leverage, strategy).`,
               `Or jump right in — call \`get_markets\` to see live prices, then \`place_trade\` to start trading.`,
               ``,
-              `Available tools: get_markets, get_orderbook, get_candles, place_trade, close_position, set_leverage, get_my_portfolio, get_leaderboard, list_agents, copy_agent`,
+              `Available tools (13):`,
+              `  📊 Market Data: get_markets, get_orderbook, get_candles`,
+              `  ⚡ Trading: place_trade, close_position, set_leverage`,
+              `  👤 Account: configure_strategy, get_my_portfolio, get_leaderboard`,
+              `  🤝 Social: list_agents, copy_agent, get_agent_trades`,
             ].join("\n"),
           },
         ],
