@@ -33,6 +33,7 @@ export default function Dashboard() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [summary, setSummary] = useState({ totalAgents: 0, totalValue: 0, totalPnl: 0, totalTrades: 0 });
   const [launching, setLaunching] = useState(false);
+  const [stopping, setStopping] = useState(false);
   const [launchError, setLaunchError] = useState<string | null>(null);
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
 
@@ -88,6 +89,27 @@ export default function Dashboard() {
       setLaunchError("Network error — could not reach server");
     }
     setLaunching(false);
+  };
+
+  const stopAll = async () => {
+    setStopping(true);
+    setLaunchError(null);
+    try {
+      const res = await fetch("/api/agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "stop" }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setLaunchError(data.error || `Stop failed (${res.status})`);
+      } else {
+        await fetchData();
+      }
+    } catch {
+      setLaunchError("Network error — could not reach server");
+    }
+    setStopping(false);
   };
 
   const runningCount = agents.filter((a) => a.isRunning).length;
@@ -162,8 +184,8 @@ export default function Dashboard() {
         <TradingFlow isActive={runningCount > 0} />
       </div>
 
-      {/* Launch Button */}
-      {runningCount === 0 && !launching && (
+      {/* Launch / Stop Button */}
+      {runningCount === 0 && !launching ? (
         <div className="rounded-xl border-2 border-dashed border-accent/40 bg-accent/5 p-8 text-center">
           <span className="text-5xl block mb-3">🦞</span>
           <h2 className="text-xl font-bold mb-2">Launch All Lobsters</h2>
@@ -181,7 +203,17 @@ export default function Dashboard() {
             <p className="text-xs text-loss mt-2">{launchError}</p>
           )}
         </div>
-      )}
+      ) : runningCount > 0 && !launching ? (
+        <div className="flex justify-center gap-3">
+          <button
+            onClick={stopAll}
+            disabled={stopping}
+            className="px-6 py-2.5 bg-loss/80 hover:bg-loss disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            {stopping ? "Stopping..." : "Stop All Lobsters"}
+          </button>
+        </div>
+      ) : null}
 
       {/* Launching Animation — shown during the launch → first trade window */}
       {(launching || (runningCount > 0 && recentLogs.length === 0)) && (
