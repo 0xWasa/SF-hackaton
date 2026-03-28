@@ -114,8 +114,30 @@ export class TradingAgent {
         throw new Error(`No paper trading account for agent ${this.config.agentId}`);
       }
 
+      // Inject stock/commodity/forex prices so agents can see ALL asset classes
+      // (Hyperliquid API only returns crypto; extra assets use mock prices from the paper engine)
+      const EXTRA_ASSET_PRICES: Record<string, number> = {
+        AAPL: 198.50, TSLA: 247.30, NVDA: 135.80, GOOG: 176.20,
+        AMZN: 189.40, META: 512.60, MSFT: 442.10, NFLX: 785.30,
+        AMD: 162.40, COIN: 265.80, GME: 28.40, AMC: 4.85,
+        HOOD: 24.60, RIVN: 13.20, PLTR: 24.80, DKNG: 38.50,
+        GOLD: 2648.50, SILVER: 31.24, OIL: 71.85,
+        EUR: 1.0842, GBP: 1.2715, JPY: 0.00667,
+      };
+      const existingSymbols = new Set(markets.map((m) => m.symbol));
+      const extraMarkets = Object.entries(EXTRA_ASSET_PRICES)
+        .filter(([sym]) => !existingSymbols.has(sym))
+        .map(([symbol, basePrice]) => {
+          const jitter = 1 + (Math.random() - 0.5) * 0.004;
+          const price = +(basePrice * jitter).toPrecision(7);
+          const change24h = (Math.random() - 0.45) * 4;
+          const volume24h = symbol === 'GOLD' ? 180_000_000_000 : Math.round(1_000_000_000 + Math.random() * 10_000_000_000);
+          return { symbol, price, volume24h, change24h };
+        });
+      const allMarkets = [...markets, ...extraMarkets];
+
       // Personality-tailored market views — each agent sees DIFFERENT asset classes
-      const validMarkets = markets.filter((m) => m.price > 0);
+      const validMarkets = allMarkets.filter((m) => m.price > 0);
       const MAJORS = ['BTC', 'ETH', 'SOL', 'BNB'];
       const STOCKS = ['AAPL', 'TSLA', 'NVDA', 'GOOG', 'AMZN', 'META', 'MSFT', 'NFLX', 'AMD', 'COIN', 'GME', 'AMC', 'HOOD', 'RIVN', 'PLTR'];
       const COMMODITIES = ['GOLD', 'SILVER', 'OIL'];
