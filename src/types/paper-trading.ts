@@ -62,6 +62,7 @@ export interface TradeResult {
   success: boolean;
   trade?: PaperTrade;
   error?: string;
+  note?: string;
 }
 
 export interface ExecuteTradeParams {

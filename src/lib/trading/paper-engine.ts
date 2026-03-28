@@ -73,6 +73,7 @@ export class PaperTradingEngine {
     }
 
     const leverage = params.leverage ?? 1;
+    let sizeAdjustedNote: string | undefined;
 
     // Determine execution price
     let execPrice: number;
@@ -153,12 +154,21 @@ export class PaperTradingEngine {
         (existingPosition.side === 'short' && params.side === 'sell'))
     ) {
       // Adding to existing position — average entry price
-      const margin = (params.size * execPrice) / leverage;
+      let tradeSize = params.size;
+      let margin = (tradeSize * execPrice) / leverage;
       if (margin > account.balance) {
-        return {
-          success: false,
-          error: `Insufficient balance. Need ${margin.toFixed(2)} USDC margin, have ${account.balance.toFixed(2)}`,
-        };
+        // Auto-adjust size down to max affordable
+        const maxMargin = account.balance * 0.95; // Keep 5% buffer
+        if (maxMargin <= 0) {
+          return { success: false, error: 'Insufficient balance — no margin available' };
+        }
+        const originalSize = tradeSize;
+        tradeSize = (maxMargin * leverage) / execPrice;
+        tradeSize = Math.max(0.001, tradeSize);
+        margin = (tradeSize * execPrice) / leverage;
+        params.size = tradeSize;
+        sizeAdjustedNote = `Size adjusted from ${originalSize.toFixed(6)} to ${tradeSize.toFixed(6)} to fit available margin ($${account.balance.toFixed(2)})`;
+        console.log(`[PaperEngine] ${sizeAdjustedNote}`);
       }
       account.balance -= margin;
 
@@ -170,12 +180,21 @@ export class PaperTradingEngine {
       existingPosition.size = totalSize;
     } else {
       // Opening new position
-      const margin = (params.size * execPrice) / leverage;
+      let tradeSize = params.size;
+      let margin = (tradeSize * execPrice) / leverage;
       if (margin > account.balance) {
-        return {
-          success: false,
-          error: `Insufficient balance. Need ${margin.toFixed(2)} USDC margin, have ${account.balance.toFixed(2)}`,
-        };
+        // Auto-adjust size down to max affordable
+        const maxMargin = account.balance * 0.95; // Keep 5% buffer
+        if (maxMargin <= 0) {
+          return { success: false, error: 'Insufficient balance — no margin available' };
+        }
+        const originalSize = tradeSize;
+        tradeSize = (maxMargin * leverage) / execPrice;
+        tradeSize = Math.max(0.001, tradeSize);
+        margin = (tradeSize * execPrice) / leverage;
+        params.size = tradeSize;
+        sizeAdjustedNote = `Size adjusted from ${originalSize.toFixed(6)} to ${tradeSize.toFixed(6)} to fit available margin ($${account.balance.toFixed(2)})`;
+        console.log(`[PaperEngine] ${sizeAdjustedNote}`);
       }
       account.balance -= margin;
 
@@ -207,7 +226,7 @@ export class PaperTradingEngine {
     // Mirror trade to copiers
     await this.mirrorTradeToCopiers(agentId, params);
 
-    return { success: true, trade };
+    return { success: true, trade, note: sizeAdjustedNote };
   }
 
   async closePosition(

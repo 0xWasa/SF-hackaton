@@ -9,13 +9,13 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     type: 'function',
     function: {
       name: 'place_trade',
-      description: 'Place a new trade / open a position',
+      description: 'Place a new trade / open a position. IMPORTANT: size is in BASE ASSET UNITS, not USD. For example, BTC at $109,000 means size=0.01 is a $1,090 position. Always check your balance first: margin_needed = size * price / leverage. If size is too large, it will be auto-adjusted down.',
       parameters: {
         type: 'object',
         properties: {
           symbol: { type: 'string', description: 'Trading pair symbol, e.g. BTC, ETH, SOL' },
           side: { type: 'string', enum: ['buy', 'sell'], description: 'Trade direction' },
-          size: { type: 'number', description: 'Position size in USD notional' },
+          size: { type: 'number', description: 'Size in base asset units (e.g. 0.01 BTC, 1.5 ETH). margin = size * price / leverage. Must fit within your balance.' },
           leverage: { type: 'number', description: 'Leverage multiplier (1-10)' },
           type: { type: 'string', enum: ['market', 'limit'], description: 'Order type' },
           price: { type: 'number', description: 'Limit price (required for limit orders)' },
@@ -177,12 +177,13 @@ export class TradingAgent {
                 type: args.type || 'market',
                 price: args.price,
               });
+              const noteStr = result.note ? ` (${result.note})` : '';
               actions.push({
                 type: 'place_trade',
                 details: args,
                 result: result.success ? 'success' : 'error',
                 message: result.success
-                  ? `Opened ${args.side} ${args.symbol} $${args.size} @ ${args.leverage}x`
+                  ? `Opened ${args.side} ${args.symbol} size=${result.trade?.size ?? args.size} @ ${args.leverage}x${noteStr}`
                   : `Failed: ${result.error}`,
               });
             } catch (err) {
