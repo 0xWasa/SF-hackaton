@@ -283,9 +283,9 @@ export default function Dashboard() {
           </div>
           <div className="space-y-3">
             {[
-              { emoji: "🦞", name: "The Conservative Lobster", status: "Scanning BTC & ETH trends..." },
-              { emoji: "🦀", name: "The Degen Lobster", status: "Looking for momentum plays..." },
-              { emoji: "🐙", name: "The Arbitrage Lobster", status: "Reading orderbook spreads..." },
+              { emoji: "🦞", name: "The Conservative Lobster", status: "Scanning BTC, AAPL, GOLD..." },
+              { emoji: "🦀", name: "The Degen Lobster", status: "Hunting momentum on altcoins & meme stocks..." },
+              { emoji: "🐙", name: "The Arbitrage Lobster", status: "Reading spreads across crypto, stocks & gold..." },
             ].map((lobster, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-white/[0.02] border border-card-border/30">
                 <span className="text-lg">{lobster.emoji}</span>

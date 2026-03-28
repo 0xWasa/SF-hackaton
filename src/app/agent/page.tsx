@@ -40,15 +40,15 @@ const lobsterEmojis: Record<string, string> = {
 };
 
 const lobsterDescriptions: Record<string, string> = {
-  "conservative": "BTC/ETH only, 1-2x leverage, limit orders, waits for clear trends",
-  "degen": "Altcoins, 5-10x leverage, market orders, chases momentum",
-  "arbitrage": "Orderbook imbalances, both sides, captures spreads",
+  "conservative": "BTC, ETH, AAPL, NVDA, GOLD — 1-2x leverage, safe blue chips",
+  "degen": "Altcoins, meme stocks (GME, TSLA), 5-10x leverage, chases momentum",
+  "arbitrage": "Cross-asset spreads — crypto vs stocks vs gold, both sides",
 };
 
 const lobsterActiveMessages: Record<string, string> = {
-  "conservative-lobster": "The conservative lobster is scanning BTC dips...",
-  "degen-lobster": "The degen lobster is hunting 5x altcoin moves...",
-  "arbitrage-lobster": "The arbitrage lobster is reading orderbook spreads...",
+  "conservative-lobster": "Scanning blue chips — BTC, AAPL, GOLD...",
+  "degen-lobster": "Hunting 5x moves on altcoins & meme stocks...",
+  "arbitrage-lobster": "Reading spreads across crypto, stocks & gold...",
 };
 
 const lobsterIdleMessages: Record<string, string> = {

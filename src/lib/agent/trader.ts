@@ -13,7 +13,7 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
       parameters: {
         type: 'object',
         properties: {
-          symbol: { type: 'string', description: 'Trading pair symbol, e.g. BTC, ETH, SOL' },
+          symbol: { type: 'string', description: 'Trading pair symbol, e.g. BTC, ETH, SOL, AAPL, TSLA, GOLD' },
           side: { type: 'string', enum: ['buy', 'sell'], description: 'Trade direction' },
           size: { type: 'number', description: 'Size in base asset units (e.g. 0.01 BTC, 1.5 ETH). margin = size * price / leverage. Must fit within your balance.' },
           leverage: { type: 'number', description: 'Leverage multiplier (1-10)' },
@@ -114,35 +114,49 @@ export class TradingAgent {
         throw new Error(`No paper trading account for agent ${this.config.agentId}`);
       }
 
-      // Personality-tailored market views so agents trade different assets
+      // Personality-tailored market views — each agent sees DIFFERENT asset classes
       const validMarkets = markets.filter((m) => m.price > 0);
       const MAJORS = ['BTC', 'ETH', 'SOL', 'BNB'];
+      const STOCKS = ['AAPL', 'TSLA', 'NVDA', 'GOOG', 'AMZN', 'META', 'MSFT', 'NFLX', 'AMD', 'COIN', 'GME', 'AMC', 'HOOD', 'RIVN', 'PLTR'];
+      const COMMODITIES = ['GOLD', 'SILVER', 'OIL'];
+      const BLUE_CHIPS = [...MAJORS, 'AAPL', 'NVDA', 'GOOG', 'MSFT', 'GOLD'];
       const MEMECOINS = ['DOGE', 'PEPE', 'WIF', 'BONK', 'SHIB', 'FLOKI', 'TURBO', 'NEIRO', 'POPCAT'];
 
       let topMarkets;
       if (this.config.personality === 'conservative') {
-        // Conservative: focus on majors only
+        // Conservative: blue-chip crypto + safe stocks + gold
         topMarkets = validMarkets
-          .filter((m) => MAJORS.includes(m.symbol))
+          .filter((m) => BLUE_CHIPS.includes(m.symbol))
           .sort((a, b) => b.volume24h - a.volume24h);
-      } else if (this.config.personality === 'degen') {
-        // Degen: altcoins and memecoins, sorted by absolute price change
-        const altcoins = validMarkets.filter((m) => !MAJORS.includes(m.symbol));
-        topMarkets = altcoins
-          .sort((a, b) => Math.abs(b.change24h ?? 0) - Math.abs(a.change24h ?? 0))
-          .slice(0, 15);
-        // Always include a couple memecoins if available
-        const memes = validMarkets.filter((m) => MEMECOINS.includes(m.symbol));
-        for (const meme of memes.slice(0, 5)) {
-          if (!topMarkets.find((t) => t.symbol === meme.symbol)) {
-            topMarkets.push(meme);
-          }
+        // Add GOLD/SILVER if available
+        for (const sym of COMMODITIES) {
+          const c = validMarkets.find((m) => m.symbol === sym);
+          if (c && !topMarkets.find((t) => t.symbol === sym)) topMarkets.push(c);
         }
+      } else if (this.config.personality === 'degen') {
+        // Degen: volatile altcoins + meme stocks + volatile tech
+        const degenTargets = [...MEMECOINS, 'GME', 'AMC', 'HOOD', 'RIVN', 'TSLA', 'PLTR', 'DKNG'];
+        const degenMarkets = validMarkets.filter((m) => degenTargets.includes(m.symbol));
+        const altcoins = validMarkets
+          .filter((m) => !MAJORS.includes(m.symbol) && !STOCKS.includes(m.symbol) && !COMMODITIES.includes(m.symbol))
+          .sort((a, b) => Math.abs(b.change24h ?? 0) - Math.abs(a.change24h ?? 0))
+          .slice(0, 10);
+        topMarkets = [...degenMarkets, ...altcoins];
+        // Deduplicate
+        const seen = new Set<string>();
+        topMarkets = topMarkets.filter((m) => seen.has(m.symbol) ? false : (seen.add(m.symbol), true)).slice(0, 20);
       } else {
-        // Arbitrage: top volume markets (liquid = easier to arb)
-        topMarkets = validMarkets
+        // Arbitrage: cross-asset — mix of crypto, stocks, commodities for spread capture
+        const arbAssets = ['BTC', 'ETH', 'SOL', 'AAPL', 'TSLA', 'NVDA', 'GOLD', 'SILVER'];
+        topMarkets = validMarkets.filter((m) => arbAssets.includes(m.symbol));
+        // Add top volume markets for liquidity
+        const topVol = validMarkets
           .sort((a, b) => b.volume24h - a.volume24h)
-          .slice(0, 20);
+          .slice(0, 15);
+        for (const m of topVol) {
+          if (!topMarkets.find((t) => t.symbol === m.symbol)) topMarkets.push(m);
+        }
+        topMarkets = topMarkets.slice(0, 20);
       }
 
       const marketSummary = topMarkets

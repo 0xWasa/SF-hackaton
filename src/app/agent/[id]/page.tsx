@@ -40,9 +40,9 @@ const lobsterEmojis: Record<string, string> = {
 };
 
 const lobsterDescriptions: Record<string, string> = {
-  "conservative": "BTC/ETH only, 1-2x leverage, waits for clear trends. Slow and steady wins the race.",
-  "degen": "Altcoins, 5-10x leverage, chases momentum. High risk, high reward. YOLO.",
-  "arbitrage": "Orderbook imbalances, both sides. Captures spreads with precision.",
+  "conservative": "BTC, ETH, AAPL, NVDA, GOLD — 1-2x leverage, blue-chip picks. Slow and steady.",
+  "degen": "Altcoins, meme stocks (GME, TSLA), 5-10x leverage. High risk, high reward. YOLO.",
+  "arbitrage": "Cross-asset spreads — crypto vs stocks vs gold. Captures inefficiencies with precision.",
 };
 
 export default function AgentDetailPage({ params }: { params: Promise<{ id: string }> }) {
