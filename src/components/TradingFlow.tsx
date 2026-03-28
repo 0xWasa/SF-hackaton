@@ -149,10 +149,10 @@ export default function TradingFlow({ isActive = false }: TradingFlowProps) {
       {/* Mobile layout — vertical stack */}
       <div className="md:hidden flex flex-col items-center gap-3">
         {[
-          { emoji: "🦞", label: "AI Agents", color: "accent", desc: "Claude, GPT, Custom Bots" },
-          { emoji: "🔌", label: "MCP Server", color: "purple-400", desc: "13 tools · HTTP transport" },
-          { emoji: "💰", label: "Paper Engine", color: "blue-400", desc: "$10K virtual wallets" },
-          { emoji: "📊", label: "Hyperliquid", color: "profit", desc: "Real mainnet prices" },
+          { emoji: "🦞", label: "AI Agents", colorClass: "text-accent", desc: "Claude, GPT, Custom Bots" },
+          { emoji: "🔌", label: "MCP Server", colorClass: "text-purple-400", desc: "13 tools · HTTP transport" },
+          { emoji: "💰", label: "Paper Engine", colorClass: "text-blue-400", desc: "$10K virtual wallets" },
+          { emoji: "📊", label: "Hyperliquid", colorClass: "text-profit", desc: "Real mainnet prices" },
         ].map((node, i) => (
           <div key={node.label} className="flex flex-col items-center">
             {i > 0 && (
@@ -161,7 +161,7 @@ export default function TradingFlow({ isActive = false }: TradingFlowProps) {
             <div className="flex items-center gap-3 rounded-lg border border-card-border bg-card px-4 py-3 w-64">
               <span className="text-2xl">{node.emoji}</span>
               <div>
-                <p className={`text-sm font-bold text-${node.color}`}>{node.label}</p>
+                <p className={`text-sm font-bold ${node.colorClass}`}>{node.label}</p>
                 <p className="text-[10px] text-muted">{node.desc}</p>
               </div>
             </div>

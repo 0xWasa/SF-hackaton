@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface TradeNotification {
   id: string;
@@ -12,49 +12,52 @@ interface TradeNotification {
 
 export default function TradeFlash() {
   const [notifications, setNotifications] = useState<TradeNotification[]>([]);
-  const [lastCheckTime, setLastCheckTime] = useState(() => Date.now());
+  const lastCheckTimeRef = useRef(0);
 
-  const checkForTrades = useCallback(async () => {
-    try {
-      const res = await fetch("/api/agent");
-      const data = await res.json();
-      const agents = data.agents || [];
+  useEffect(() => {
+    lastCheckTimeRef.current = Date.now();
 
-      const newNotifs: TradeNotification[] = [];
+    async function checkForTrades() {
+      try {
+        const res = await fetch("/api/agent");
+        const data = await res.json();
+        const agents = data.agents || [];
 
-      for (const agent of agents) {
-        for (const log of agent.logs || []) {
-          const logTime = new Date(log.timestamp).getTime();
-          if (logTime <= lastCheckTime) continue;
+        const newNotifs: TradeNotification[] = [];
+        const checkTime = lastCheckTimeRef.current;
 
-          for (const action of log.actions || []) {
-            if (action.type === "place_trade" || action.type === "close_position") {
-              newNotifs.push({
-                id: `${agent.agentId}-${logTime}-${Math.random()}`,
-                agentName: agent.name,
-                message: action.message,
-                isProfit: action.type === "close_position" || action.message?.includes("buy"),
-                timestamp: logTime,
-              });
+        for (const agent of agents) {
+          for (const log of agent.logs || []) {
+            const logTime = new Date(log.timestamp).getTime();
+            if (logTime <= checkTime) continue;
+
+            for (const action of log.actions || []) {
+              if (action.type === "place_trade" || action.type === "close_position") {
+                newNotifs.push({
+                  id: `${agent.agentId}-${logTime}-${Math.random()}`,
+                  agentName: agent.name,
+                  message: action.message,
+                  isProfit: action.type === "close_position" || action.message?.includes("buy"),
+                  timestamp: logTime,
+                });
+              }
             }
           }
         }
-      }
 
-      if (newNotifs.length > 0) {
-        setNotifications((prev) => [...prev, ...newNotifs].slice(-5));
-      }
+        if (newNotifs.length > 0) {
+          setNotifications((prev) => [...prev, ...newNotifs].slice(-5));
+        }
 
-      setLastCheckTime(Date.now());
-    } catch {
-      // silent
+        lastCheckTimeRef.current = Date.now();
+      } catch {
+        // silent
+      }
     }
-  }, [lastCheckTime]);
 
-  useEffect(() => {
     const interval = setInterval(checkForTrades, 4000);
     return () => clearInterval(interval);
-  }, [checkForTrades]);
+  }, []);
 
   // Auto-dismiss after 4s
   useEffect(() => {
