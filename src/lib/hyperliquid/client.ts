@@ -76,16 +76,27 @@ export class HyperliquidClient {
   // --- Read operations: MAINNET (real prices & data) ---
 
   async getMarkets(): Promise<Market[]> {
-    const [meta, mids] = await Promise.all([
-      this.mainnetInfo.meta(),
-      this.mainnetInfo.allMids(),
-    ]);
+    const [meta, assetCtxs] = await this.mainnetInfo.metaAndAssetCtxs();
 
-    return meta.universe.map((asset: any) => ({
-      symbol: asset.name,
-      price: parseFloat((mids as any)[asset.name] || "0"),
-      volume24h: 0,
-    }));
+    return meta.universe.map((asset: any, index: number) => {
+      const ctx = assetCtxs[index];
+      const midPx = ctx?.midPx ? parseFloat(ctx.midPx) : 0;
+      const prevDayPx = ctx?.prevDayPx ? parseFloat(ctx.prevDayPx) : 0;
+      const dayNtlVlm = ctx?.dayNtlVlm ? parseFloat(ctx.dayNtlVlm) : 0;
+      const funding = ctx?.funding ? parseFloat(ctx.funding) : 0;
+      const openInterest = ctx?.openInterest ? parseFloat(ctx.openInterest) : 0;
+      const change24h = prevDayPx > 0 ? ((midPx - prevDayPx) / prevDayPx) * 100 : 0;
+
+      return {
+        symbol: asset.name,
+        price: midPx,
+        volume24h: dayNtlVlm,
+        change24h,
+        prevDayPx,
+        funding,
+        openInterest,
+      };
+    });
   }
 
   async getOrderbook(symbol: string): Promise<Orderbook> {

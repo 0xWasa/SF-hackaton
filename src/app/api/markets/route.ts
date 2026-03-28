@@ -14,7 +14,9 @@ function getMockMarkets() {
   return Object.entries(MOCK_BASE_PRICES).map(([symbol, basePrice]) => {
     // Random walk: -0.3% to +0.3% per tick
     const jitter = 1 + (Math.random() - 0.5) * 0.006;
-    return { symbol, price: +(basePrice * jitter).toPrecision(6), volume24h: 0 };
+    const price = +(basePrice * jitter).toPrecision(6);
+    const change24h = (Math.random() - 0.45) * 8; // -3.6% to +4.4%
+    return { symbol, price, volume24h: Math.round(Math.random() * 500_000_000), change24h };
   });
 }
 

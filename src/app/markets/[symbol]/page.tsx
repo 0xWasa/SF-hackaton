@@ -28,6 +28,9 @@ interface MarketDetail {
   symbol: string;
   price: number;
   volume24h: number;
+  change24h: number;
+  funding: number;
+  openInterest: number;
   candles: CandleData[];
   orderbook: { bids: OrderbookLevel[]; asks: OrderbookLevel[] };
   agentActivity: AgentActivity[];
@@ -83,6 +86,13 @@ function formatPrice(price: number) {
   return price.toFixed(6);
 }
 
+function formatVol(vol: number): string {
+  if (vol >= 1_000_000_000) return `$${(vol / 1_000_000_000).toFixed(1)}B`;
+  if (vol >= 1_000_000) return `$${(vol / 1_000_000).toFixed(1)}M`;
+  if (vol >= 1_000) return `$${(vol / 1_000).toFixed(0)}K`;
+  return `$${vol.toFixed(0)}`;
+}
+
 export default function MarketDetailPage({ params }: { params: Promise<{ symbol: string }> }) {
   const { symbol } = use(params);
   const sym = symbol.toUpperCase();
@@ -132,8 +142,7 @@ export default function MarketDetailPage({ params }: { params: Promise<{ symbol:
   }
 
   const candles = data.candles;
-  const priceChange = candles.length >= 2 ? data.price - candles[0].close : 0;
-  const priceChangePct = candles.length >= 2 ? (priceChange / candles[0].close) * 100 : 0;
+  const priceChangePct = data.change24h || 0;
   const high24h = candles.length > 0 ? Math.max(...candles.map((c) => c.high)) : 0;
   const low24h = candles.length > 0 ? Math.min(...candles.map((c) => c.low)) : 0;
 
@@ -149,14 +158,20 @@ export default function MarketDetailPage({ params }: { params: Promise<{ symbol:
           </h1>
           <div className="flex items-baseline gap-3 mt-1">
             <span className="text-2xl font-mono font-semibold">${formatPrice(data.price)}</span>
-            <span className={`text-sm font-mono ${priceChange >= 0 ? "text-profit" : "text-loss"}`}>
-              {priceChange >= 0 ? "▲" : "▼"} {Math.abs(priceChangePct).toFixed(2)}%
+            <span className={`text-sm font-mono ${priceChangePct >= 0 ? "text-profit" : "text-loss"}`}>
+              {priceChangePct >= 0 ? "▲" : "▼"} {Math.abs(priceChangePct).toFixed(2)}%
             </span>
           </div>
         </div>
         <div className="text-right text-sm text-muted/60 space-y-1">
           <div>24h High: <span className="text-foreground font-mono">${formatPrice(high24h)}</span></div>
           <div>24h Low: <span className="text-foreground font-mono">${formatPrice(low24h)}</span></div>
+          {data.volume24h > 0 && (
+            <div>24h Vol: <span className="text-foreground font-mono">${formatVol(data.volume24h)}</span></div>
+          )}
+          {data.funding !== 0 && (
+            <div>Funding: <span className={`font-mono ${data.funding >= 0 ? "text-profit" : "text-loss"}`}>{(data.funding * 100).toFixed(4)}%</span></div>
+          )}
         </div>
       </div>
 

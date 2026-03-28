@@ -49,7 +49,6 @@ const SANDBOX_TOOLS = [
   // Market data
   { name: "get_markets", description: "Get all trading markets with current prices" },
   { name: "get_orderbook", description: "Get order book for a trading pair" },
-  { name: "get_portfolio", description: "Get Hyperliquid account state" },
   { name: "get_candles", description: "Get OHLCV candlestick data" },
   // Account
   { name: "create_account", description: "Create account — get wallet + $10K virtual USDC" },

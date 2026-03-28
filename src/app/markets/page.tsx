@@ -8,6 +8,7 @@ interface MarketData {
   symbol: string;
   price: number;
   volume24h: number;
+  change24h?: number;
 }
 
 type Category = "all" | "majors" | "altcoins" | "memecoins";
@@ -28,6 +29,13 @@ const CATEGORY_LABELS: Record<Category, string> = {
   altcoins: "Altcoins",
   memecoins: "Memecoins",
 };
+
+function formatVolume(vol: number): string {
+  if (vol >= 1_000_000_000) return `$${(vol / 1_000_000_000).toFixed(1)}B`;
+  if (vol >= 1_000_000) return `$${(vol / 1_000_000).toFixed(1)}M`;
+  if (vol >= 1_000) return `$${(vol / 1_000).toFixed(0)}K`;
+  return `$${vol.toFixed(0)}`;
+}
 
 // Mini sparkline from price history
 function Sparkline({ history, current }: { history: number[]; current: number }) {
@@ -182,8 +190,9 @@ export default function MarketsPage() {
                   <th className="pb-3 text-left font-medium">#</th>
                   <th className="pb-3 text-left font-medium">Symbol</th>
                   <th className="pb-3 text-right font-medium">Price (USD)</th>
+                  <th className="pb-3 text-right font-medium">24h Change</th>
                   <th className="pb-3 text-right font-medium">Trend</th>
-                  <th className="pb-3 text-right font-medium">Change</th>
+                  <th className="pb-3 text-right font-medium">24h Volume</th>
                   <th className="pb-3 text-center font-medium">Category</th>
                 </tr>
               </thead>
@@ -216,17 +225,20 @@ export default function MarketsPage() {
                             : m.price.toFixed(6)}
                         </Link>
                       </td>
+                      <td className="py-3 text-right font-mono text-xs">
+                        {m.change24h !== undefined && m.change24h !== 0 ? (
+                          <span className={m.change24h >= 0 ? "text-profit" : "text-loss"}>
+                            {m.change24h >= 0 ? "+" : ""}{m.change24h.toFixed(2)}%
+                          </span>
+                        ) : (
+                          <span className="text-muted/30">—</span>
+                        )}
+                      </td>
                       <td className="py-3 text-right">
                         <Sparkline history={history} current={m.price} />
                       </td>
-                      <td className="py-3 text-right">
-                        {changed ? (
-                          <span className={`font-mono text-xs ${up ? "text-profit" : "text-loss"}`}>
-                            {up ? "▲" : "▼"}
-                          </span>
-                        ) : (
-                          <span className="text-muted/30 text-xs">—</span>
-                        )}
+                      <td className="py-3 text-right font-mono text-xs text-muted/60">
+                        {m.volume24h > 0 ? formatVolume(m.volume24h) : "—"}
                       </td>
                       <td className="py-3 text-center">
                         <span className={`text-xs px-2 py-0.5 rounded-full ${

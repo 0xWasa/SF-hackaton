@@ -66,6 +66,9 @@ export async function GET(
       symbol: sym,
       price: market?.price ?? 0,
       volume24h: market?.volume24h ?? 0,
+      change24h: market?.change24h ?? 0,
+      funding: market?.funding ?? 0,
+      openInterest: market?.openInterest ?? 0,
       candles: candles.map((c) => ({
         time: c.timestamp,
         open: c.open,

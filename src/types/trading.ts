@@ -2,6 +2,10 @@ export interface Market {
   symbol: string;
   price: number;
   volume24h: number;
+  change24h?: number;      // percentage change from previous day close
+  prevDayPx?: number;      // previous day close price
+  funding?: number;        // current funding rate
+  openInterest?: number;   // total open interest (USD)
 }
 
 export interface OrderbookLevel {
