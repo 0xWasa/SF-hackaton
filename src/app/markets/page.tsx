@@ -13,23 +13,44 @@ interface MarketData {
   change24h?: number;
 }
 
-type Category = "all" | "majors" | "altcoins" | "memecoins";
+type Category = "all" | "crypto" | "stocks" | "commodities" | "forex";
 
-const MAJORS = ["BTC", "ETH", "SOL"];
-const MEMECOINS = ["DOGE", "PEPE", "WIF", "BONK", "SHIB", "FLOKI", "MEME", "APE", "TURBO", "NEIRO", "MOG", "BRETT", "POPCAT"];
-// Altcoins = everything else
+const STOCKS = [
+  "AAPL", "TSLA", "NVDA", "GOOG", "AMZN", "META", "MSFT", "NFLX", "AMD", "INTC",
+  "COIN", "MSTR", "GME", "AMC", "PLTR", "SNAP", "UBER", "ABNB", "SNOW", "SQ",
+  "BABA", "NIO", "PYPL", "DIS", "BA", "JPM", "GS", "V", "MA", "WMT",
+  "COST", "HD", "LOW", "TGT", "SBUX", "MCD", "KO", "PEP", "JNJ", "PFE",
+  "MRNA", "LLY", "UNH", "CVS", "ABBV", "TMO", "DHR", "ABT", "BMY", "AMGN",
+  "CRM", "ORCL", "ADBE", "NOW", "SHOP", "ZM", "DOCU", "ROKU", "NET", "CRWD",
+  "DKNG", "PENN", "RBLX", "U", "SPOT", "SQ", "HOOD", "RIVN", "LCID", "F",
+  "GM", "TM", "HMC", "RACE", "NKE", "LULU", "GPS", "ANF", "RL",
+  "SPY", "QQQ", "IWM", "DIA", "XLF", "XLE", "XLK", "XLV",
+  "TSM", "ASML", "AVGO", "QCOM", "TXN", "MU", "AMAT", "KLAC", "LRCX",
+];
+const COMMODITIES = ["GOLD", "SILVER", "OIL", "PLATINUM", "COPPER", "NATGAS", "WHEAT", "CORN", "SOYBEAN"];
+const FOREX = ["EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "NZD", "CNH", "SGD", "HKD", "KRW", "INR", "BRL", "MXN", "SEK", "NOK", "DKK", "PLN", "ZAR", "TRY"];
 
-function categorize(symbol: string): "majors" | "memecoins" | "altcoins" {
-  if (MAJORS.includes(symbol)) return "majors";
-  if (MEMECOINS.includes(symbol)) return "memecoins";
-  return "altcoins";
+function categorize(symbol: string): "crypto" | "stocks" | "commodities" | "forex" {
+  if (STOCKS.includes(symbol)) return "stocks";
+  if (COMMODITIES.includes(symbol)) return "commodities";
+  if (FOREX.includes(symbol)) return "forex";
+  return "crypto";
 }
 
 const CATEGORY_LABELS: Record<Category, string> = {
   all: "All",
-  majors: "Majors",
-  altcoins: "Altcoins",
-  memecoins: "Memecoins",
+  crypto: "Crypto",
+  stocks: "Stocks",
+  commodities: "Commodities",
+  forex: "Forex",
+};
+
+const CATEGORY_ICONS: Record<Category, string> = {
+  all: "🌐",
+  crypto: "₿",
+  stocks: "📈",
+  commodities: "🥇",
+  forex: "💱",
 };
 
 function formatVolume(vol: number): string {
@@ -135,7 +156,7 @@ export default function MarketsPage() {
   }, [markets, category, search]);
 
   const counts = useMemo(() => {
-    const c = { all: markets.length, majors: 0, altcoins: 0, memecoins: 0 };
+    const c = { all: markets.length, crypto: 0, stocks: 0, commodities: 0, forex: 0 };
     markets.forEach((m) => { c[categorize(m.symbol)]++; });
     return c;
   }, [markets]);
@@ -145,8 +166,13 @@ export default function MarketsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Markets</h1>
         <p className="text-sm text-muted mt-1">
-          Real-time prices from Hyperliquid mainnet — click any market for details
+          150+ markets — crypto, stocks, commodities, forex — all from Hyperliquid. Click any for details.
         </p>
+      </div>
+
+      {/* Asset pitch */}
+      <div className="rounded-lg border border-accent/20 bg-accent/5 px-4 py-2.5 text-sm text-muted">
+        <span className="text-accent font-semibold">Not just crypto</span> — Your AI agent can trade stocks, crypto, gold, forex — all in one sandbox.
       </div>
 
       {/* Category tabs */}
@@ -161,6 +187,7 @@ export default function MarketsPage() {
                 : "bg-white/[0.04] text-muted hover:text-foreground hover:bg-white/[0.08]"
             }`}
           >
+            <span className="mr-1">{CATEGORY_ICONS[cat]}</span>
             {CATEGORY_LABELS[cat]}
             <span className="ml-1.5 text-xs opacity-60">{counts[cat]}</span>
           </button>
@@ -251,11 +278,12 @@ export default function MarketsPage() {
                       </td>
                       <td className="py-3 text-center">
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          cat === "majors" ? "bg-accent/10 text-accent" :
-                          cat === "memecoins" ? "bg-purple-500/10 text-purple-400" :
-                          "bg-white/[0.04] text-muted/60"
+                          cat === "stocks" ? "bg-blue-500/10 text-blue-400" :
+                          cat === "commodities" ? "bg-yellow-500/10 text-yellow-400" :
+                          cat === "forex" ? "bg-purple-500/10 text-purple-400" :
+                          "bg-accent/10 text-accent"
                         }`}>
-                          {cat === "majors" ? "Major" : cat === "memecoins" ? "Meme" : "Alt"}
+                          {cat === "crypto" ? "Crypto" : cat === "stocks" ? "Stock" : cat === "commodities" ? "Commodity" : "Forex"}
                         </span>
                       </td>
                     </tr>
