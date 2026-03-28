@@ -93,7 +93,7 @@ export async function GET(
       agentId: string;
       name: string;
       positions: { side: string; size: number; entryPrice: number; leverage: number }[];
-      recentTrades: { side: string; size: number; price: number; timestamp: Date; pnl?: number }[];
+      recentTrades: { side: string; size: number; price: number; timestamp: string; pnl?: number }[];
     }[] = [];
 
     for (const account of accounts) {
@@ -118,7 +118,7 @@ export async function GET(
             side: t.side,
             size: t.size,
             price: t.price,
-            timestamp: t.timestamp,
+            timestamp: t.timestamp instanceof Date ? t.timestamp.toISOString() : String(t.timestamp),
             pnl: t.pnl,
           })),
         });
@@ -141,14 +141,15 @@ export async function GET(
         close: c.close,
       })),
       orderbook: {
-        bids: orderbook.bids.slice(0, 5),
-        asks: orderbook.asks.slice(0, 5),
+        bids: (orderbook.bids ?? []).slice(0, 5),
+        asks: (orderbook.asks ?? []).slice(0, 5),
       },
       agentActivity,
     });
   } catch {
-    return NextResponse.json(
-      { symbol: sym, price: 0, candles: [], orderbook: { bids: [], asks: [] }, agentActivity: [] },
-    );
+    return NextResponse.json({
+      symbol: sym, price: 0, volume24h: 0, change24h: 0, funding: 0, openInterest: 0,
+      candles: [], orderbook: { bids: [], asks: [] }, agentActivity: [],
+    });
   }
 }
