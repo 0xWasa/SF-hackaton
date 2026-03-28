@@ -1,63 +1,87 @@
-# Liquidation Arena
+# Agent Trading Sandbox
 
-A real-time game where AI agents take trading positions using Hyperliquid market data, and players guess which agent gets wiped out first.
+Autonomous AI trading infrastructure on Hyperliquid — built for the humanless economy.
 
 ## Overview
 
-The goal is to turn complex trading mechanics into a simple, visual, and competitive experience.
+Agent Trading Sandbox is a platform where AI agents autonomously trade perpetual futures on Hyperliquid's testnet. An MCP (Model Context Protocol) server exposes trading primitives as tools, and an OpenAI-powered agent analyzes markets, makes decisions, and executes trades — all without human intervention.
 
-AI agents analyze live Hyperliquid data (price, funding, open interest) and take positions with different strategies. Each round, players watch the market move in real time and predict which agent will be liquidated first.
+A real-time dashboard lets you watch the agent think, trade, and manage risk live.
 
-## Why it matters
+## Architecture
 
-Most people don't understand how leveraged markets behave.
+```
+┌─────────────────┐     ┌──────────────┐     ┌─────────────────┐
+│  Next.js 15 UI  │◄───►│  MCP Server  │◄───►│  Hyperliquid    │
+│  (Dashboard)    │     │  (Tools)     │     │  Testnet API    │
+└─────────────────┘     └──────┬───────┘     └─────────────────┘
+                               │
+                        ┌──────┴───────┐
+                        │  OpenAI Agent│
+                        │  (Decisions) │
+                        └──────────────┘
+```
 
-By turning these dynamics into a game driven by AI agents, Liquidation Arena makes trading mechanics intuitive, engaging, and accessible — while showing how different strategies perform under real market conditions.
+## Features
 
-## Features (MVP)
-
-- Real-time market data from Hyperliquid
-- Multiple AI agents with distinct strategies
-- Live price movement and liquidation thresholds
-- Simple game loop: guess who gets liquidated first
-- Visual, fast-paced, and accessible interface
+- **MCP Server**: Exposes Hyperliquid trading as standardized tools (get_markets, place_order, get_portfolio, etc.)
+- **AI Trading Agent**: OpenAI-powered autonomous trader with observe → think → act loop
+- **Live Dashboard**: Real-time portfolio, markets, positions, and agent reasoning log
+- **Risk Management**: Configurable position limits, conservative by default
 
 ## Tech Stack
 
-- **Frontend**: Next.js / React
-- **Backend**: Node.js / Express
-- **AI**: Claude API
-- **Data**: Hyperliquid API
+- **Frontend**: Next.js 15 / TypeScript / Tailwind CSS
+- **MCP Server**: @modelcontextprotocol/sdk (stdio transport)
+- **AI**: OpenAI API (function calling)
+- **Trading**: Hyperliquid Testnet API
+- **Wallet**: ethers.js
 
 ## Project Structure
 
 ```
-├── frontend/     # Next.js app
-├── backend/      # API server + AI agents
-├── docs/         # Documentation & specs
-└── README.md
+src/
+  app/                 # Next.js pages & API routes
+  lib/
+    hyperliquid/       # Hyperliquid API client
+    mcp/               # MCP server (trading tools)
+    agent/             # AI trading agent
+  components/          # React UI components
+  types/               # Shared TypeScript types
 ```
 
 ## Getting Started
 
-### Backend
+### Prerequisites
+
+- Node.js 18+
+- Hyperliquid testnet wallet (private key)
+- OpenAI API key
+
+### Setup
+
 ```bash
-cd backend
 npm install
+cp .env.example .env.local
+# Fill in HYPERLIQUID_PRIVATE_KEY and OPENAI_API_KEY
+```
+
+### Run the app
+
+```bash
 npm run dev
 ```
 
-### Frontend
+### Run the MCP server (standalone)
+
 ```bash
-cd frontend
-npm install
-npm run dev
+npx tsx src/lib/mcp/index.ts
 ```
 
 ## Status
 
 Work in progress — built for Ralphthon SF (March 2026)
 
-## Author
+## Team
 
 0xWasa
