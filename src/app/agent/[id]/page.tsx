@@ -54,10 +54,12 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
 
   const fetchData = useCallback(async () => {
     try {
-      const [agentRes, portfolioRes] = await Promise.all([
-        fetch(`/api/agent/${id}`).then((r) => r.json()),
-        fetch("/api/portfolio").then((r) => r.json()),
+      const [agentRaw, portfolioRaw] = await Promise.all([
+        fetch(`/api/agent/${id}`),
+        fetch("/api/portfolio"),
       ]);
+      const agentRes = agentRaw.ok ? await agentRaw.json() : {};
+      const portfolioRes = portfolioRaw.ok ? await portfolioRaw.json() : { portfolios: [] };
 
       if (agentRes.status) setStatus(agentRes.status);
       if (agentRes.logs) setLogs(agentRes.logs);

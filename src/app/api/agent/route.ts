@@ -76,6 +76,6 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch {
-    return NextResponse.json({ error: 'Service temporarily unavailable. Try again.' }, { status: 200 });
+    return NextResponse.json({ error: 'Service temporarily unavailable. Try again.' }, { status: 500 });
   }
 }

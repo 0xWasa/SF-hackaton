@@ -32,15 +32,19 @@ export default function Dashboard() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [summary, setSummary] = useState({ totalAgents: 0, totalValue: 0, totalPnl: 0, totalTrades: 0 });
   const [launching, setLaunching] = useState(false);
+  const [launchError, setLaunchError] = useState<string | null>(null);
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
-      const [agentRes, leaderboardRes, portfolioRes] = await Promise.all([
-        fetch("/api/agent").then((r) => r.json()),
-        fetch("/api/leaderboard").then((r) => r.json()),
-        fetch("/api/portfolio").then((r) => r.json()),
+      const [agentRaw, leaderboardRaw, portfolioRaw] = await Promise.all([
+        fetch("/api/agent"),
+        fetch("/api/leaderboard"),
+        fetch("/api/portfolio"),
       ]);
+      const agentRes = agentRaw.ok ? await agentRaw.json() : { agents: [] };
+      const leaderboardRes = leaderboardRaw.ok ? await leaderboardRaw.json() : { leaderboard: [] };
+      const portfolioRes = portfolioRaw.ok ? await portfolioRaw.json() : { summary: { totalAgents: 0, totalValue: 0, totalPnl: 0, totalTrades: 0 } };
       setAgents(agentRes.agents || []);
       setLeaderboard(leaderboardRes.leaderboard || []);
       setSummary(portfolioRes.summary || { totalAgents: 0, totalValue: 0, totalPnl: 0, totalTrades: 0 });
@@ -66,15 +70,21 @@ export default function Dashboard() {
 
   const launchAll = async () => {
     setLaunching(true);
+    setLaunchError(null);
     try {
-      await fetch("/api/agent", {
+      const res = await fetch("/api/agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "launch-all" }),
       });
-      await fetchData();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setLaunchError(data.error || `Launch failed (${res.status})`);
+      } else {
+        await fetchData();
+      }
     } catch {
-      // silent fail
+      setLaunchError("Network error — could not reach server");
     }
     setLaunching(false);
   };
@@ -166,6 +176,9 @@ export default function Dashboard() {
           >
             {launching ? "Launching..." : "Launch All Lobsters 🦞"}
           </button>
+          {launchError && (
+            <p className="text-xs text-loss mt-2">{launchError}</p>
+          )}
         </div>
       )}
 
@@ -173,9 +186,13 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card title="Total Paper Money in Play">
           <p className="text-2xl font-semibold font-mono">
-            ${summary.totalValue > 0 ? summary.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "30,000.00"}
+            ${summary.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
-          <p className="text-xs text-muted mt-1">Simulated funds across {summary.totalAgents || 3} lobsters</p>
+          <p className="text-xs text-muted mt-1">
+            {summary.totalAgents > 0
+              ? `Simulated funds across ${summary.totalAgents} lobster${summary.totalAgents !== 1 ? "s" : ""}`
+              : "Launch lobsters to start trading"}
+          </p>
         </Card>
 
         <Card title="Total Trades">
@@ -208,7 +225,7 @@ export default function Dashboard() {
         <Card title="Lobster Status" action={
           runningCount > 0 ? <StatusBadge status="trading" label={`${runningCount} active`} /> : <StatusBadge status="offline" label="idle" />
         }>
-          <p className="text-2xl font-semibold font-mono">{runningCount} / {agents.length || 3}</p>
+          <p className="text-2xl font-semibold font-mono">{runningCount} / {agents.length}</p>
           <p className="text-xs text-muted mt-1">
             {runningCount > 0 ? "Lobsters in the arena" : "Launch to begin"}
           </p>

@@ -31,6 +31,7 @@ export default function LeaderboardPage() {
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch("/api/leaderboard");
+      if (!res.ok) { setLoading(false); return; }
       const data = await res.json();
       setAgents(data.leaderboard || []);
       setLoading(false);

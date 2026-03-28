@@ -19,6 +19,7 @@ export default function PortfolioPage() {
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch("/api/portfolio");
+      if (!res.ok) { setLoading(false); return; }
       const data = await res.json();
       setPortfolios(data.portfolios || []);
       setSummary(data.summary || { totalAgents: 0, totalValue: 0, totalPnl: 0, totalTrades: 0 });

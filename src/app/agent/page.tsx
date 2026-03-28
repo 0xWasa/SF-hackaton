@@ -50,16 +50,17 @@ export default function AgentPage() {
   const [loading, setLoading] = useState(true);
   const [launching, setLaunching] = useState(false);
   const [stopping, setStopping] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [combinedPnl, setCombinedPnl] = useState<number | null>(null);
   const [totalTrades, setTotalTrades] = useState(0);
 
   const fetchData = useCallback(async () => {
     try {
-      const [agentRes, leaderboardRes] = await Promise.all([
+      const [agentRaw, leaderboardRes] = await Promise.all([
         fetch("/api/agent"),
         fetch("/api/leaderboard"),
       ]);
-      const data = await agentRes.json();
+      const data = agentRaw.ok ? await agentRaw.json() : { agents: [] };
       const agentList: AgentStatus[] = data.agents || [];
       setAgents(agentList);
 
@@ -70,12 +71,14 @@ export default function AgentPage() {
       setAllLogs(merged);
 
       // Combined P&L from leaderboard
-      try {
-        const lb = await leaderboardRes.json();
-        const entries: { pnl: number; totalTrades: number }[] = lb.leaderboard || [];
-        setCombinedPnl(entries.reduce((sum, e) => sum + e.pnl, 0));
-        setTotalTrades(entries.reduce((sum, e) => sum + e.totalTrades, 0));
-      } catch { /* ignore */ }
+      if (leaderboardRes.ok) {
+        try {
+          const lb = await leaderboardRes.json();
+          const entries: { pnl: number; totalTrades: number }[] = lb.leaderboard || [];
+          setCombinedPnl(entries.reduce((sum, e) => sum + e.pnl, 0));
+          setTotalTrades(entries.reduce((sum, e) => sum + e.totalTrades, 0));
+        } catch { /* ignore */ }
+      }
 
       setLoading(false);
     } catch {
@@ -91,27 +94,43 @@ export default function AgentPage() {
 
   const launchAll = async () => {
     setLaunching(true);
+    setActionError(null);
     try {
-      await fetch("/api/agent", {
+      const res = await fetch("/api/agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "launch-all" }),
       });
-      await fetchData();
-    } catch {}
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.error || `Launch failed (${res.status})`);
+      } else {
+        await fetchData();
+      }
+    } catch {
+      setActionError("Network error — could not reach server");
+    }
     setLaunching(false);
   };
 
   const stopAll = async () => {
     setStopping(true);
+    setActionError(null);
     try {
-      await fetch("/api/agent", {
+      const res = await fetch("/api/agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "stop" }),
       });
-      await fetchData();
-    } catch {}
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.error || `Stop failed (${res.status})`);
+      } else {
+        await fetchData();
+      }
+    } catch {
+      setActionError("Network error — could not reach server");
+    }
     setStopping(false);
   };
 
@@ -151,6 +170,12 @@ export default function AgentPage() {
           )}
         </div>
       </div>
+
+      {actionError && (
+        <div className="rounded-lg border border-loss/30 bg-loss/5 px-4 py-2 text-sm text-loss">
+          {actionError}
+        </div>
+      )}
 
       {/* Combined stats */}
       {(runningCount > 0 || totalTrades > 0) && (
