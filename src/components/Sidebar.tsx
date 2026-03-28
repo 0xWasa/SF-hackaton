@@ -23,9 +23,8 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Close mobile menu on route change
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {

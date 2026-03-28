@@ -102,6 +102,14 @@ export default function PortfolioPage() {
             }
             subtitle={p.strategy || undefined}
           >
+            {/* Wallet Address */}
+            {p.walletAddress && (
+              <div className="flex items-center gap-2 mb-3 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-card-border/30 w-fit">
+                <span className="text-xs text-muted/50">Wallet</span>
+                <code className="text-xs font-mono text-accent/80">{p.walletAddress}</code>
+              </div>
+            )}
+
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               <div>
