@@ -80,7 +80,7 @@ export default function Sidebar() {
           <span className="text-sm font-semibold text-foreground leading-tight">
             The Lobster Pit
           </span>
-          <span className="text-xs text-muted leading-tight">AI Trading Sandbox</span>
+          <span className="text-xs text-muted leading-tight">Train Your AI to Trade</span>
         </div>
       </div>
 

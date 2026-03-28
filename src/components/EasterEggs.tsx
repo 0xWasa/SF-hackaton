@@ -38,23 +38,22 @@ export default function EasterEggs() {
   // Console ASCII art on mount
   useEffect(() => {
     console.log(`
-     🦞🦞🦞🦞🦞🦞🦞🦞🦞🦞🦞
+%c     🦞🦞🦞🦞🦞🦞🦞🦞🦞🦞🦞
      🦞                       🦞
-     🦞  AGENT TRADING        🦞
-     🦞  SANDBOX              🦞
+     🦞  THE LOBSTER PIT       🦞
+     🦞                       🦞
+     🦞  Train your AI agent  🦞
+     🦞  to trade — risk free 🦞
      🦞                       🦞
      🦞  Built by lobsters,   🦞
-     🦞  for lobsters.        🦞
-     🦞                       🦞
-     🦞  No humans were       🦞
-     🦞  harmed (but some     🦞
-     🦞  wore costumes).      🦞
+     🦞  for lobsters. No     🦞
+     🦞  humans needed.       🦞
      🦞                       🦞
      🦞🦞🦞🦞🦞🦞🦞🦞🦞🦞🦞
 
   The French Lobster 🦞🇫🇷
   Ralphthon SF 2026
-    `);
+    `, "color: #f97316; font-weight: bold;");
   }, []);
 
   // First visit confetti
