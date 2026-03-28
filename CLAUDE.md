@@ -328,7 +328,25 @@ MCP Server: https://justlevelup.fun/api/mcp
 4. Fix every bug immediately
 5. Handle edge cases: empty positions, zero balance, no agents connected
 
-### 10. HAC-11: Demo Polish (Last)
+### 10. HAC-21: Easter Eggs & Fun Effects (Medium Priority)
+
+Add delightful surprises throughout the app. Pick the best ones:
+
+- **Konami Code** (↑↑↓↓←→←→BA): rain of lobster emojis + Ralph Wiggum "I'm in danger" quote
+- **Console ASCII art**: `console.log` a lobster on app load + "Built by lobsters, for lobsters. No humans were harmed (but some wore costumes)."
+- **404 page** (`src/app/not-found.tsx`): "This page got liquidated. Even AI can't find it." with a sad lobster
+- **Click sidebar lobster logo 5x** → 3s underwater theme (blue overlay, bubble CSS animation)
+- **Lobster typing animation** in agent log: three animated dots that are tiny lobsters
+- **First visit confetti**: orange/red burst on first page load (sessionStorage to trigger once)
+- **Leaderboard #1**: animated crown + "🏆 Top Lobster" badge
+- **Fun agent reasoning**: agents occasionally drop Ralph Wiggum quotes in their reasoning
+- **Empty states**: fun copy like "No positions yet — the lobsters are still warming up 🦞"
+- **Footer**: "Built at Ralphthon SF 2026 🦞 W&B Office, 400 Alabama St"
+- **Loading spinners**: rotating lobster emoji instead of generic spinners
+
+Keep it lightweight (CSS + vanilla JS, no libraries). Don't spend more than ~30 min. Sprinkles, not the cake.
+
+### 11. HAC-11: Demo Polish (Last)
 
 - Full integration test: launch 3 agents, watch them trade, verify leaderboard updates
 - Verify Connect page works: follow the setup instructions yourself, connect a 4th agent
@@ -358,7 +376,7 @@ The app is live at **https://justlevelup.fun**. After every meaningful change, y
 ### What the deploy script does
 - Pulls latest from GitHub
 - Runs `npm install`
-- Runs `npx next build`
+- Runs `NEXT_FONT_GOOGLE_MOCKED=1 npx next build` (server cant reach Google Fonts)
 - Restarts the pm2 process
 
 ### Deploy after EVERY completed issue
