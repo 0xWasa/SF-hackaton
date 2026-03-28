@@ -114,14 +114,43 @@ export class TradingAgent {
         throw new Error(`No paper trading account for agent ${this.config.agentId}`);
       }
 
-      // Build a summary of top markets by price
-      const topMarkets = markets
-        .filter((m) => m.price > 0)
-        .sort((a, b) => b.price - a.price)
-        .slice(0, 20);
+      // Personality-tailored market views so agents trade different assets
+      const validMarkets = markets.filter((m) => m.price > 0);
+      const MAJORS = ['BTC', 'ETH', 'SOL', 'BNB'];
+      const MEMECOINS = ['DOGE', 'PEPE', 'WIF', 'BONK', 'SHIB', 'FLOKI', 'TURBO', 'NEIRO', 'POPCAT'];
+
+      let topMarkets;
+      if (this.config.personality === 'conservative') {
+        // Conservative: focus on majors only
+        topMarkets = validMarkets
+          .filter((m) => MAJORS.includes(m.symbol))
+          .sort((a, b) => b.volume24h - a.volume24h);
+      } else if (this.config.personality === 'degen') {
+        // Degen: altcoins and memecoins, sorted by absolute price change
+        const altcoins = validMarkets.filter((m) => !MAJORS.includes(m.symbol));
+        topMarkets = altcoins
+          .sort((a, b) => Math.abs(b.change24h ?? 0) - Math.abs(a.change24h ?? 0))
+          .slice(0, 15);
+        // Always include a couple memecoins if available
+        const memes = validMarkets.filter((m) => MEMECOINS.includes(m.symbol));
+        for (const meme of memes.slice(0, 5)) {
+          if (!topMarkets.find((t) => t.symbol === meme.symbol)) {
+            topMarkets.push(meme);
+          }
+        }
+      } else {
+        // Arbitrage: top volume markets (liquid = easier to arb)
+        topMarkets = validMarkets
+          .sort((a, b) => b.volume24h - a.volume24h)
+          .slice(0, 20);
+      }
 
       const marketSummary = topMarkets
-        .map((m) => `${m.symbol}: $${m.price.toFixed(2)}`)
+        .map((m) => {
+          const change = m.change24h !== undefined ? ` (${m.change24h >= 0 ? '+' : ''}${m.change24h.toFixed(2)}%)` : '';
+          const vol = m.volume24h > 0 ? ` vol:$${(m.volume24h / 1_000_000).toFixed(1)}M` : '';
+          return `${m.symbol}: $${m.price >= 1 ? m.price.toFixed(2) : m.price.toFixed(6)}${change}${vol}`;
+        })
         .join('\n');
 
       const positionsSummary = account.positions.length > 0

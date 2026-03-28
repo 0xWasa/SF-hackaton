@@ -22,7 +22,7 @@ Transport:    Streamable HTTP
 ```
 ┌─────────────────┐     ┌──────────────┐     ┌─────────────────┐
 │  Next.js UI     │◄───►│  MCP Server  │◄───►│  Hyperliquid    │
-│  (Observation   │     │  (14 Tools)  │     │  Mainnet (read) │
+│  (Observation   │     │  (13 Tools)  │     │  Mainnet (read) │
 │   Deck)         │     └──────┬───────┘     └─────────────────┘
 └─────────────────┘            │
                         ┌──────┴───────┐
