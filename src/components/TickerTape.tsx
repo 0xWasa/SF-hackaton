@@ -16,24 +16,11 @@ export default function TickerTape() {
   useEffect(() => {
     async function fetchTicker() {
       try {
-        const [marketsRes, leaderboardRes] = await Promise.all([
-          fetch("/api/markets").then((r) => r.json()),
-          fetch("/api/leaderboard").then((r) => r.json()),
-        ]);
+        const leaderboardRes = await fetch("/api/leaderboard").then((r) => r.json());
 
         const tickers: TickerItem[] = [];
 
-        // Add top 8 markets with real 24h changes
-        const markets = (marketsRes.markets || []).slice(0, 8);
-        for (const m of markets) {
-          tickers.push({
-            symbol: m.symbol,
-            price: m.price,
-            change24h: m.change24h,
-          });
-        }
-
-        // Add agents
+        // Only show AI agents / lobsters
         for (const a of leaderboardRes.leaderboard || []) {
           tickers.push({ agentName: a.name, pnl: a.pnl });
         }
@@ -60,27 +47,11 @@ export default function TickerTape() {
       <div className="ticker-scroll flex gap-8 whitespace-nowrap">
         {doubled.map((item, i) => (
           <span key={i} className="inline-flex items-center gap-1.5 text-xs font-mono shrink-0">
-            {item.symbol ? (
-              <>
-                <span className="text-foreground/70 font-semibold">{item.symbol}</span>
-                <span className="text-foreground/50">
-                  ${item.price! >= 1 ? item.price!.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.price!.toFixed(4)}
-                </span>
-                {item.change24h !== undefined && item.change24h !== 0 && (
-                  <span className={item.change24h >= 0 ? "text-profit" : "text-loss"}>
-                    {item.change24h >= 0 ? "+" : ""}{item.change24h.toFixed(1)}%
-                  </span>
-                )}
-              </>
-            ) : (
-              <>
-                <span className="text-accent">🦞</span>
-                <span className="text-foreground/70">{item.agentName}</span>
-                <span className={item.pnl! >= 0 ? "text-profit" : "text-loss"}>
-                  {item.pnl! >= 0 ? "+" : ""}${item.pnl!.toFixed(2)}
-                </span>
-              </>
-            )}
+            <span className="text-accent">🦞</span>
+            <span className="text-foreground/70">{item.agentName}</span>
+            <span className={item.pnl! >= 0 ? "text-profit" : "text-loss"}>
+              {item.pnl! >= 0 ? "+" : ""}${item.pnl!.toFixed(2)}
+            </span>
           </span>
         ))}
       </div>
