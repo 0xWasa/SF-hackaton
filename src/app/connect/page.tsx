@@ -254,7 +254,7 @@ export default function ConnectPage() {
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <p className="text-xs text-accent font-semibold uppercase tracking-wider mb-1">MCP Server Endpoint</p>
-            <code className="text-lg font-mono font-bold text-foreground">{MCP_ENDPOINT}</code>
+            <code className="text-sm sm:text-lg font-mono font-bold text-foreground break-all">{MCP_ENDPOINT}</code>
           </div>
           <button
             onClick={() => copyToClipboard(MCP_ENDPOINT, "endpoint")}

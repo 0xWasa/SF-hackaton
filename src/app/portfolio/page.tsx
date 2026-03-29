@@ -55,7 +55,7 @@ export default function PortfolioPage() {
       </div>
 
       {/* Balance overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
         <Card title="Combined Value">
           <p className="text-2xl font-semibold font-mono">
             ${summary.totalValue > 0 ? summary.totalValue.toFixed(2) : "0.00"}
@@ -104,9 +104,9 @@ export default function PortfolioPage() {
           >
             {/* Wallet Address */}
             {p.walletAddress && (
-              <div className="flex items-center gap-2 mb-3 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-card-border/30 w-fit">
-                <span className="text-xs text-muted/50">Wallet</span>
-                <code className="text-xs font-mono text-accent/80">{p.walletAddress}</code>
+              <div className="flex items-center gap-2 mb-3 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-card-border/30 max-w-full overflow-hidden">
+                <span className="text-xs text-muted/50 shrink-0">Wallet</span>
+                <code className="text-xs font-mono text-accent/80 truncate">{p.walletAddress}</code>
               </div>
             )}
 
@@ -138,16 +138,16 @@ export default function PortfolioPage() {
                 <h4 className="text-xs text-muted/60 font-medium mb-2">Open Positions</h4>
                 <div className="space-y-2">
                   {p.positions.map((pos) => (
-                    <div key={pos.symbol} className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-card-border/50">
-                      <div className="flex items-center gap-3">
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${pos.side === 'long' ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'}`}>
+                    <div key={pos.symbol} className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 p-3 rounded-lg bg-white/[0.02] border border-card-border/50">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded shrink-0 ${pos.side === 'long' ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'}`}>
                           {pos.side.toUpperCase()}
                         </span>
                         <span className="font-semibold">{pos.symbol}</span>
                         <span className="text-xs text-muted">{pos.leverage}x</span>
                       </div>
                       <div className="text-right">
-                        <p className="font-mono text-sm">{pos.size} @ ${pos.entryPrice.toFixed(2)}</p>
+                        <p className="font-mono text-xs sm:text-sm">{pos.size} @ ${pos.entryPrice.toFixed(2)}</p>
                         <p className={`font-mono text-xs ${(pos.unrealizedPnl || 0) >= 0 ? "text-profit" : "text-loss"}`}>
                           {(pos.unrealizedPnl || 0) >= 0 ? "+" : ""}${(pos.unrealizedPnl || 0).toFixed(2)}
                         </p>
@@ -166,17 +166,17 @@ export default function PortfolioPage() {
                 <h4 className="text-xs text-muted/60 font-medium mb-2">Recent Trades</h4>
                 <div className="space-y-1">
                   {p.recentTrades.slice(-5).reverse().map((t) => (
-                    <div key={t.id} className="flex items-center justify-between py-1.5 border-b border-card-border/20 last:border-0 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className={t.side === 'buy' ? "text-profit" : "text-loss"}>
+                    <div key={t.id} className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-1 py-1.5 border-b border-card-border/20 last:border-0 text-xs">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`shrink-0 ${t.side === 'buy' ? "text-profit" : "text-loss"}`}>
                           {t.side.toUpperCase()}
                         </span>
-                        <span>{t.symbol}</span>
-                        <span className="text-muted">{t.size} @ ${t.price.toFixed(2)}</span>
-                        <span className="text-muted">{t.leverage}x</span>
+                        <span className="shrink-0">{t.symbol}</span>
+                        <span className="text-muted truncate">{t.size} @ ${t.price.toFixed(2)}</span>
+                        <span className="text-muted shrink-0">{t.leverage}x</span>
                       </div>
                       {t.pnl !== undefined && (
-                        <span className={`font-mono ${t.pnl >= 0 ? "text-profit" : "text-loss"}`}>
+                        <span className={`font-mono shrink-0 ${t.pnl >= 0 ? "text-profit" : "text-loss"}`}>
                           {t.pnl >= 0 ? "+" : ""}${t.pnl.toFixed(2)}
                         </span>
                       )}

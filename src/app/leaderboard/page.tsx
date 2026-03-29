@@ -66,7 +66,7 @@ export default function LeaderboardPage() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Card title="Lobsters in the Arena">
           <p className="text-2xl font-semibold font-mono">{agents.length}</p>
         </Card>
@@ -139,7 +139,7 @@ export default function LeaderboardPage() {
                   <p className="text-sm text-muted/70 italic">&quot;{agent.strategy}&quot;</p>
 
                   {/* Stats row */}
-                  <div className="flex flex-wrap gap-x-6 gap-y-2 mt-3 text-sm">
+                  <div className="flex flex-wrap gap-x-4 sm:gap-x-6 gap-y-2 mt-3 text-sm">
                     <div>
                       <span className="text-muted/50 text-xs">Total Value</span>
                       <p className="font-mono font-semibold">${agent.totalValue.toFixed(2)}</p>

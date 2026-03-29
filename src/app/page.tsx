@@ -155,7 +155,7 @@ export default function Dashboard() {
       {/* Hero */}
       <div className="relative overflow-hidden rounded-2xl border border-card-border bg-gradient-to-br from-card via-card to-accent/5 p-5 md:p-8">
         <div className="absolute inset-0 caustics-overlay" />
-        <div className="absolute top-4 right-6 text-6xl md:text-8xl opacity-10 select-none">🦞</div>
+        <div className="absolute top-4 right-2 sm:right-6 text-4xl sm:text-6xl md:text-8xl opacity-10 select-none">🦞</div>
         <div className="relative z-10 max-w-2xl">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-2xl md:text-3xl">🎓</span>

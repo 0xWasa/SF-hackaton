@@ -176,31 +176,33 @@ export default function MarketsPage() {
       </div>
 
       {/* Category tabs */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {(Object.keys(CATEGORY_LABELS) as Category[]).map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setCategory(cat)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              category === cat
-                ? "bg-accent text-white"
-                : "bg-white/[0.04] text-muted hover:text-foreground hover:bg-white/[0.08]"
-            }`}
-          >
-            <span className="mr-1">{CATEGORY_ICONS[cat]}</span>
-            {CATEGORY_LABELS[cat]}
-            <span className="ml-1.5 text-xs opacity-60">{counts[cat]}</span>
-          </button>
-        ))}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          {(Object.keys(CATEGORY_LABELS) as Category[]).map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setCategory(cat)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                category === cat
+                  ? "bg-accent text-white"
+                  : "bg-white/[0.04] text-muted hover:text-foreground hover:bg-white/[0.08]"
+              }`}
+            >
+              <span className="mr-1">{CATEGORY_ICONS[cat]}</span>
+              {CATEGORY_LABELS[cat]}
+              <span className="ml-1.5 text-xs opacity-60">{counts[cat]}</span>
+            </button>
+          ))}
+        </div>
 
         {/* Search */}
-        <div className="ml-auto">
+        <div className="sm:ml-auto">
           <input
             type="text"
             placeholder="Search symbol..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-white/[0.04] border border-card-border rounded-lg px-3 py-1.5 text-sm text-foreground placeholder:text-muted/40 focus:outline-none focus:border-accent/50 w-40"
+            className="bg-white/[0.04] border border-card-border rounded-lg px-3 py-1.5 text-sm text-foreground placeholder:text-muted/40 focus:outline-none focus:border-accent/50 w-full sm:w-40"
           />
         </div>
       </div>
@@ -222,13 +224,13 @@ export default function MarketsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-card-border text-xs text-muted/60">
-                  <th className="pb-3 text-left font-medium">#</th>
+                  <th className="pb-3 text-left font-medium hidden sm:table-cell">#</th>
                   <th className="pb-3 text-left font-medium">Symbol</th>
-                  <th className="pb-3 text-right font-medium">Price (USD)</th>
-                  <th className="pb-3 text-right font-medium">24h Change</th>
-                  <th className="pb-3 text-right font-medium">Trend</th>
-                  <th className="pb-3 text-right font-medium">24h Volume</th>
-                  <th className="pb-3 text-center font-medium">Category</th>
+                  <th className="pb-3 text-right font-medium">Price</th>
+                  <th className="pb-3 text-right font-medium">24h</th>
+                  <th className="pb-3 text-right font-medium hidden md:table-cell">Trend</th>
+                  <th className="pb-3 text-right font-medium hidden sm:table-cell">Volume</th>
+                  <th className="pb-3 text-center font-medium hidden lg:table-cell">Category</th>
                 </tr>
               </thead>
               <tbody>
@@ -245,14 +247,14 @@ export default function MarketsPage() {
                       onClick={() => router.push(`/markets/${m.symbol}`)}
                       className="border-b border-card-border/50 last:border-0 hover:bg-white/[0.04] transition-colors cursor-pointer group"
                     >
-                      <td className="py-3 text-muted/40 font-mono text-xs">{i + 1}</td>
+                      <td className="py-3 text-muted/40 font-mono text-xs hidden sm:table-cell">{i + 1}</td>
                       <td className="py-3">
                         <Link href={`/markets/${m.symbol}`} className="block">
                           <span className="font-semibold group-hover:text-accent transition-colors">{m.symbol}</span>
-                          <span className="text-muted ml-1">/ USD</span>
+                          <span className="text-muted ml-1 hidden sm:inline">/ USD</span>
                         </Link>
                       </td>
-                      <td className={`py-3 text-right font-mono transition-colors ${
+                      <td className={`py-3 text-right font-mono text-xs sm:text-sm transition-colors ${
                         changed ? (up ? "text-profit" : "text-loss") : ""
                       }`}>
                         <Link href={`/markets/${m.symbol}`} className="block">
@@ -270,13 +272,13 @@ export default function MarketsPage() {
                           <span className="text-muted/30">—</span>
                         )}
                       </td>
-                      <td className="py-3 text-right">
+                      <td className="py-3 text-right hidden md:table-cell">
                         <Sparkline history={history} current={m.price} />
                       </td>
-                      <td className="py-3 text-right font-mono text-xs text-muted/60">
+                      <td className="py-3 text-right font-mono text-xs text-muted/60 hidden sm:table-cell">
                         {m.volume24h > 0 ? formatVolume(m.volume24h) : "—"}
                       </td>
-                      <td className="py-3 text-center">
+                      <td className="py-3 text-center hidden lg:table-cell">
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                           cat === "stocks" ? "bg-blue-500/10 text-blue-400" :
                           cat === "commodities" ? "bg-yellow-500/10 text-yellow-400" :

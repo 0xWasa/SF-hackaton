@@ -155,14 +155,14 @@ export default function AgentPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Agent Log</h1>
           <p className="text-sm text-muted mt-1">
             Peek inside the lobster&apos;s brain — watch them analyze markets and make trades in real-time
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           {runningCount > 0 ? (
             <StatusBadge status="trading" label={`${runningCount} lobsters active`} />
           ) : (
@@ -172,7 +172,7 @@ export default function AgentPage() {
             <button
               onClick={launchAll}
               disabled={launching}
-              className="px-5 py-2.5 bg-accent hover:bg-accent/90 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+              className="px-4 py-2 sm:px-5 sm:py-2.5 bg-accent hover:bg-accent/90 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
             >
               {launching ? (
                 <span className="inline-flex items-center gap-2">
@@ -184,7 +184,7 @@ export default function AgentPage() {
             <button
               onClick={stopAll}
               disabled={stopping}
-              className="px-5 py-2.5 bg-loss/80 hover:bg-loss disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+              className="px-4 py-2 sm:px-5 sm:py-2.5 bg-loss/80 hover:bg-loss disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
             >
               {stopping ? "Stopping..." : "Stop All"}
             </button>
@@ -200,7 +200,7 @@ export default function AgentPage() {
 
       {/* Combined stats */}
       {(runningCount > 0 || totalTrades > 0) && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-3 sm:gap-4">
           <div className="rounded-lg border border-card-border/50 bg-card p-4 text-center">
             <p className="text-xs text-muted mb-1">Lobsters Active</p>
             <p className="text-2xl font-semibold font-tabular">{runningCount} / 3</p>

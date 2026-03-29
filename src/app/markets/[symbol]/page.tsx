@@ -147,21 +147,21 @@ export default function MarketDetailPage({ params }: { params: Promise<{ symbol:
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div>
           <Link href="/markets" className="text-xs text-accent hover:underline">← Back to Markets</Link>
-          <h1 className="text-3xl font-bold mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold mt-1">
             {sym}
-            <span className="text-muted/60 text-lg ml-2">/ USD</span>
+            <span className="text-muted/60 text-base sm:text-lg ml-2">/ USD</span>
           </h1>
           <div className="flex items-baseline gap-3 mt-1">
-            <span className="text-2xl font-mono font-semibold">${formatPrice(data.price)}</span>
+            <span className="text-xl sm:text-2xl font-mono font-semibold">${formatPrice(data.price)}</span>
             <span className={`text-sm font-mono ${priceChangePct >= 0 ? "text-profit" : "text-loss"}`}>
               {priceChangePct >= 0 ? "▲" : "▼"} {Math.abs(priceChangePct).toFixed(2)}%
             </span>
           </div>
         </div>
-        <div className="text-right text-sm text-muted/60 space-y-1">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 sm:flex-col sm:text-right text-sm text-muted/60">
           <div>24h High: <span className="text-foreground font-mono">${formatPrice(high24h)}</span></div>
           <div>24h Low: <span className="text-foreground font-mono">${formatPrice(low24h)}</span></div>
           {data.volume24h > 0 && (

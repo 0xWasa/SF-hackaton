@@ -123,20 +123,20 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/agent" className="text-muted hover:text-foreground transition-colors">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Link href="/agent" className="text-muted hover:text-foreground transition-colors shrink-0">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <span className="text-4xl">{emoji}</span>
-          <div>
-            <h1 className="text-2xl font-semibold">{status.name}</h1>
-            <p className="text-sm text-muted">{lobsterDescriptions[personality] || personality}</p>
+          <span className="text-3xl sm:text-4xl">{emoji}</span>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-semibold truncate">{status.name}</h1>
+            <p className="text-xs sm:text-sm text-muted">{lobsterDescriptions[personality] || personality}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 pl-8 sm:pl-0">
           {status.isRunning ? (
             <StatusBadge status="trading" label="Active" />
           ) : (
@@ -174,16 +174,16 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
         <Card title="Open Positions">
           <div className="space-y-2">
             {portfolio.positions.map((pos) => (
-              <div key={pos.symbol} className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-card-border/50">
-                <div className="flex items-center gap-3">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${pos.side === 'long' ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'}`}>
+              <div key={pos.symbol} className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 p-3 rounded-lg bg-white/[0.02] border border-card-border/50">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded shrink-0 ${pos.side === 'long' ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'}`}>
                     {pos.side.toUpperCase()}
                   </span>
                   <span className="font-semibold">{pos.symbol}</span>
                   <span className="text-xs text-muted">{pos.leverage}x</span>
                 </div>
                 <div className="text-right">
-                  <p className="font-mono text-sm">{pos.size} @ ${pos.entryPrice.toFixed(2)}</p>
+                  <p className="font-mono text-xs sm:text-sm">{pos.size} @ ${pos.entryPrice.toFixed(2)}</p>
                   <p className={`font-mono text-xs ${(pos.unrealizedPnl || 0) >= 0 ? "text-profit" : "text-loss"}`}>
                     {(pos.unrealizedPnl || 0) >= 0 ? "+" : ""}${(pos.unrealizedPnl || 0).toFixed(2)}
                   </p>
